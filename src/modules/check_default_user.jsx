@@ -213,7 +213,7 @@ export default class CheckDefaultUser extends React.Component {
                             >
                                 <div className="modal-header">
                                     <div className="justify-content-space-between">
-                                        <div>
+                                        <div className={hidePasswordDialog}>
                                             <h4 className="modal-title">
                                                 Change user password of {this.state.defaultUser}
                                             </h4>
@@ -275,7 +275,7 @@ export default class CheckDefaultUser extends React.Component {
                                         </div>
                                     </div>
                                     <div className={showSuccessMessage}>
-                                        <div className="justify-content-space-between">
+                                        <div className="div-full-center">
                                             <h3>Password changed.</h3>
                                         </div>
                                     </div>
