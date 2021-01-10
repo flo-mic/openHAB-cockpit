@@ -211,7 +211,7 @@ export default class OHStatus extends React.Component {
     render() {
         return (
             <Card className="system-configuration">
-                <CardTitle>{this.state.openhab} status</CardTitle>
+                <CardTitle style={{ paddingLeft: "16px" }}>{this.state.openhab} status</CardTitle>
                 <CardBody>
                     <Modal
             disableModalClose={this.state.disableModalClose}

@@ -210,7 +210,7 @@ export class OHStatus extends React.Component {
 
     render() {
         return (
-            <Card className="system-configuration">
+            <Card style={{ paddingLeft: "16px" }} className="system-configuration">
                 <CardTitle>{this.state.openhab} status</CardTitle>
                 <CardBody>
                     <Modal
