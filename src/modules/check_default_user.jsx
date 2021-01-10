@@ -65,11 +65,7 @@ export default class CheckDefaultUser extends React.Component {
         proc.then((data) => {
             console.log("Password updated.\n" + data);
             this.setState({
-                bodyModal: (
-                    <div style={{ padding: "1.5rem" }} className="div-full-center">
-                        <h3>Password changed.</h3>
-                    </div>
-                ),
+                showSuccessMessage: true,
             });
         });
         proc.catch((exception, data) => {
@@ -115,6 +111,7 @@ export default class CheckDefaultUser extends React.Component {
             newPassword: "",
             confirmNewPassword: "",
             displayInvalidPasswordMessage: "display-none",
+            showSuccessMessage: false,
         };
         this.handleModalShow = (e) => {
             if (this.state.showModal == true) {
@@ -176,6 +173,14 @@ export default class CheckDefaultUser extends React.Component {
             ? "modal-container in"
             : "modal display-none";
 
+        const showSuccessMessage = this.state.showSuccessMessage
+            ? "display-block"
+            : "display-none";
+
+        const hidePasswordDialog = this.state.showSuccessMessage
+            ? "display-none"
+            : "display-block";
+
         return (
             <div>
                 <div className={showDefaultPasswordWarning}>
@@ -227,14 +232,14 @@ export default class CheckDefaultUser extends React.Component {
                                     </div>
                                 </div>
                                 <div className="modal-body scroll">
-                                    <div>
+                                    <div className={hidePasswordDialog}>
                                         <div className="div-full-center">
                                             <div style={{ Top: "0.5rem" }}>
                                                 <label style={{ width: "90px" }}>password:</label>
                                                 <TextInput
                           style={{ display: "inline-block", width: "200px" }}
                           value={this.state.newPassword}
-                          type="text"
+                          type="password"
                           id="newpassword"
                           onChange={this.handleNewPasswordText}
                                                 />
@@ -246,7 +251,7 @@ export default class CheckDefaultUser extends React.Component {
                                                 <TextInput
                           style={{ display: "inline-block", width: "200px" }}
                           value={this.state.confirmNewPassword}
-                          type="text"
+                          type="password"
                           id="confirmpassword"
                           onChange={this.handleConfirmNewPasswordText}
                                                 />
@@ -259,7 +264,7 @@ export default class CheckDefaultUser extends React.Component {
                                         </div>
                                         <div className="div-full-center">
                                             <button
-style={{ paddingTop: "0.5rem" }}
+                        style={{ paddingTop: "0.5rem" }}
                         className="pf-c-button pf-m-primary"
                         onClick={(e) => {
                             this.setPassword();
@@ -267,6 +272,11 @@ style={{ paddingTop: "0.5rem" }}
                                             >
                                                 Set password
                                             </button>
+                                        </div>
+                                    </div>
+                                    <div className={showSuccessMessage}>
+                                        <div className="justify-content-space-between">
+                                            <h3>Password changed.</h3>
                                         </div>
                                     </div>
                                 </div>
