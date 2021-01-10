@@ -15,7 +15,7 @@ export default class CheckDefaultUser extends React.Component {
             directory: "/usr/share/cockpit/openhab/scripts",
         });
         proc.then((data) => {
-            if (data.includes("Default password detected!.")) {
+            if (data.includes("Default password detected!")) {
                 this.setState({
                     defaultPasswordChanged: false,
                     defaultUser: data.split("(")[1].split(")")[0],
