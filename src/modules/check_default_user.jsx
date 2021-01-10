@@ -203,82 +203,82 @@ export default class CheckDefaultUser extends React.Component {
                             </a>
                         </p>
                     </Alert>
-                    <div className={showHideBackground} />
-                    <div className={showHideModal}>
-                        <div className="modal-dialog">
-                            <div
-                className="modal-content"
-                ref={(node) => {
-                    this.state.node = node;
-                }}
-                            >
-                                <div className="modal-header">
-                                    <div className="justify-content-space-between">
-                                        <div className={hidePasswordDialog}>
-                                            <h4 className="modal-title">
-                                                Change user password of {this.state.defaultUser}
-                                            </h4>
-                                        </div>
-                                        <div>
-                                            <button
-                        className="pf-c-button close-button"
-                        type="button"
-                        onClick={(e) => {
-                            this.handleModalShow(e);
-                        }}
-                                            >
-                                                X
-                                            </button>
-                                        </div>
+                </div>
+                <div className={showHideBackground} />
+                <div className={showHideModal}>
+                    <div className="modal-dialog">
+                        <div
+              className="modal-content"
+              ref={(node) => {
+                  this.state.node = node;
+              }}
+                        >
+                            <div className="modal-header">
+                                <div className="justify-content-space-between">
+                                    <div className={hidePasswordDialog}>
+                                        <h4 className="modal-title">
+                                            Change user password of {this.state.defaultUser}
+                                        </h4>
+                                    </div>
+                                    <div>
+                                        <button
+                      className="pf-c-button close-button"
+                      type="button"
+                      onClick={(e) => {
+                          this.handleModalShow(e);
+                      }}
+                                        >
+                                            X
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="modal-body scroll">
-                                    <div className={hidePasswordDialog}>
-                                        <div className="div-full-center">
-                                            <div style={{ Top: "0.5rem" }}>
-                                                <label style={{ width: "90px" }}>password:</label>
-                                                <TextInput
-                          style={{ display: "inline-block", width: "200px" }}
-                          value={this.state.newPassword}
-                          type="password"
-                          id="newpassword"
-                          onChange={this.handleNewPasswordText}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="div-full-center">
-                                            <div style={{ Top: "0.5rem" }}>
-                                                <label style={{ width: "90px" }}>confirm:</label>
-                                                <TextInput
-                          style={{ display: "inline-block", width: "200px" }}
-                          value={this.state.confirmNewPassword}
-                          type="password"
-                          id="confirmpassword"
-                          onChange={this.handleConfirmNewPasswordText}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className={this.state.displayInvalidPasswordMessage}>
-                                            <label style={{ padding: "0.5rem", color: "red" }}>
-                                                Passwords did not match!
-                                            </label>
-                                        </div>
-                                        <div className="div-full-center">
-                                            <button
-                        style={{ paddingTop: "0.5rem" }}
-                        className="pf-c-button pf-m-primary"
-                        onClick={(e) => {
-                            this.setPassword();
-                        }}
-                                            >
-                                                Set password
-                                            </button>
+                            </div>
+                            <div className="modal-body scroll">
+                                <div className={hidePasswordDialog}>
+                                    <div className="div-full-center">
+                                        <div style={{ Top: "0.5rem" }}>
+                                            <label style={{ width: "90px" }}>password:</label>
+                                            <TextInput
+                        style={{ display: "inline-block", width: "200px" }}
+                        value={this.state.newPassword}
+                        type="password"
+                        id="newpassword"
+                        onChange={this.handleNewPasswordText}
+                                            />
                                         </div>
                                     </div>
-                                    <div className={showSuccessMessage}>
-                                        <div className="div-full-center">
-                                            <h3>Password changed.</h3>
+                                    <div className="div-full-center">
+                                        <div style={{ Top: "0.5rem" }}>
+                                            <label style={{ width: "90px" }}>confirm:</label>
+                                            <TextInput
+                        style={{ display: "inline-block", width: "200px" }}
+                        value={this.state.confirmNewPassword}
+                        type="password"
+                        id="confirmpassword"
+                        onChange={this.handleConfirmNewPasswordText}
+                                            />
                                         </div>
+                                    </div>
+                                    <div className={this.state.displayInvalidPasswordMessage}>
+                                        <label style={{ padding: "0.5rem", color: "red" }}>
+                                            Passwords did not match!
+                                        </label>
+                                    </div>
+                                    <div className="div-full-center">
+                                        <button
+                      style={{ paddingTop: "0.5rem" }}
+                      className="pf-c-button pf-m-primary"
+                      onClick={(e) => {
+                          this.setPassword();
+                      }}
+                                        >
+                                            Set password
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className={showSuccessMessage}>
+                                    <div className="div-full-center">
+                                        <h3>Password changed.</h3>
                                     </div>
                                 </div>
                             </div>
