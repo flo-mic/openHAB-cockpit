@@ -1,10 +1,10 @@
-Name: cockpit-starter-kit
+Name: cockpit-openHAB
 Version: %{VERSION}
 Release: 1%{?dist}
-Summary: Cockpit Starter Kit Example Module
+Summary: openHAB Module for cockpit
 License: LGPLv2+
 
-Source: cockpit-starter-kit-%{version}.tar.gz
+Source: cockpit-openHAB-%{version}.tar.gz
 BuildArch: noarch
 BuildRequires: make
 BuildRequires: libappstream-glib
@@ -14,10 +14,10 @@ Requires: cockpit-system
 %define debug_package %{nil}
 
 %description
-Cockpit Starter Kit Example Module
+openHAB module to control the openHABian device.
 
 %prep
-%setup -n cockpit-starter-kit
+%setup -n cockpit-openHAB
 
 %install
 %make_install

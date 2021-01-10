@@ -1,25 +1,9 @@
-/*
- * This file is part of Cockpit.
- *
- * Copyright (C) 2017 Red Hat, Inc.
- *
- * Cockpit is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- *
- * Cockpit is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
- */
 
-import cockpit from 'cockpit';
-import React from 'react';
-import { Alert, Card, CardTitle, CardBody } from '@patternfly/react-core';
+import cockpit from "cockpit";
+import React from "react";
+import OHStatus from "./openhab-status.jsx";
+import Tools from "./tools.jsx";
+import "./app.scss";
 
 const _ = cockpit.gettext;
 
@@ -28,22 +12,28 @@ export class Application extends React.Component {
         super();
         this.state = { hostname: _("Unknown") };
 
-        cockpit.file('/etc/hostname').watch(content => {
+        cockpit.file("/etc/hostname").watch((content) => {
             this.setState({ hostname: content.trim() });
         });
     }
 
     render() {
         return (
-            <Card>
-                <CardTitle>Starter Kit</CardTitle>
-                <CardBody>
-                    <Alert
-                        variant="info"
-                        title={ cockpit.format(_("Running on $0"), this.state.hostname) }
-                    />
-                </CardBody>
-            </Card>
+            <div>
+                <div className="pf-c-page">
+                    <main role="main" className="pf-c-page__main" tabIndex="-1">
+                        <section className="pf-c-page__main-section pf-m-light ct-overview-header">
+                            <div className="ct-overview-header-hostname"><h1>openHAB Cockpit</h1></div>
+                        </section>
+                        <section className="pf-c-page__main-section">
+                            <div id="gallery" className="pf-l-gallery pf-m-gutter">
+                                <OHStatus />
+                                <Tools />
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            </div>
         );
     }
 }

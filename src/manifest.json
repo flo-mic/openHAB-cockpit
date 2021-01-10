@@ -4,9 +4,10 @@
         "cockpit": "137"
     },
 
-    "tools": {
+    "dashboard": {
         "index": {
-            "label": "Starter Kit"
+            "label": "openHAB"
         }
-    }
+    },
+    "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval'"
 }

@@ -18,9 +18,9 @@ class TestApplication(testlib.MachineCase):
         b = self.browser
         m = self.machine
 
-        self.login_and_go("/starter-kit")
+        self.login_and_go("/openhab")
         # verify expected heading
-        b.wait_text(".pf-c-card__title", "Starter Kit")
+        b.wait_text(".pf-c-card__title", "openHAB-cockpit")
 
         # verify expected host name
         hostname = m.execute("hostname").strip()
@@ -49,12 +49,12 @@ class TestApplication(testlib.MachineCase):
         b.reload(ignore_cache=True)
         b.wait_present("#content")
         # menu label (from manifest) should be translated
-        b.wait_text("#host-apps a[href='/starter-kit']", "Bausatz")
+        b.wait_text("#host-apps a[href='/openHAB']", "openHAB")
 
-        b.go("/starter-kit")
-        b.enter_page("/starter-kit")
+        b.go("/openHAB")
+        b.enter_page("/openHAB")
         # page label (from js) should be translated
-        b.wait_in_text(".pf-c-alert__title", "Läuft auf")
+        b.wait_in_text(".pf-c-alert__title", "openHAB")
 
 
 if __name__ == '__main__':

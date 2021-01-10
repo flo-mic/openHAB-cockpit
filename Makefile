@@ -68,6 +68,7 @@ clean:
 	[ ! -e cockpit-$(PACKAGE_NAME).spec.in ] || rm -f cockpit-$(PACKAGE_NAME).spec
 
 install: $(WEBPACK_TEST)
+	cp -r src/scripts dist/					
 	mkdir -p $(DESTDIR)/usr/share/cockpit/$(PACKAGE_NAME)
 	cp -r dist/* $(DESTDIR)/usr/share/cockpit/$(PACKAGE_NAME)
 	mkdir -p $(DESTDIR)/usr/share/metainfo/

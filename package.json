@@ -1,9 +1,9 @@
 {
-  "name": "starter-kit",
+  "name": "openhab",
   "version": "0.1.0",
-  "description": "Scaffolding for a cockpit module",
+  "description": "Manages an openHABian device.",
   "main": "index.js",
-  "repository": "git@github.com:cockpit/starter-kit.git",
+  "repository": "git@github.com:cockpit/openHAB.git",
   "author": "",
   "license": "LGPL-2.1",
   "scripts": {
@@ -47,10 +47,14 @@
     "webpack-cli": "^3.3.5"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.32",
+    "@fortawesome/free-solid-svg-icons": "^5.15.1",
+    "@fortawesome/react-fontawesome": "^0.1.14",
     "@patternfly/patternfly": "4.70.2",
     "@patternfly/react-core": "4.84.4",
     "core-js": "3.8.2",
     "react": "16.14.0",
-    "react-dom": "16.14.0"
+    "react-dom": "16.14.0",
+    "react-scroll-to-bottom": "^4.1.0"
   }
 }
