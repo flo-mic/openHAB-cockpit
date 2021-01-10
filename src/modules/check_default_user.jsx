@@ -67,6 +67,7 @@ export default class CheckDefaultUser extends React.Component {
             this.setState({
                 showSuccessMessage: true,
             });
+            this.checkForDefaultPassword();
         });
         proc.catch((exception, data) => {
             console.error(
