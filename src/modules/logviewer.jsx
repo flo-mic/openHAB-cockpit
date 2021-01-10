@@ -101,7 +101,7 @@ export default class LogViewer extends React.Component {
                                         }
                                     });
                                     // if events found merge in result table and mark last element to split
-                                    if (tmp.length > 0) {
+                                    if (tmp.length > 1) {
                                         var e = tmp[tmp.length - 1];
                                         this.setState({
                                             lastEventsLogEvent:
