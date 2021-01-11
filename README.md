@@ -29,22 +29,21 @@ sudo apt update
 sudo apt install -t buster-backports cockpit
 ```
 
-Now we can install the cockpit addon for openHAB. If you want to update the addon run the below commands again. There is no apt update or automatic update at the moment.
+Now we can install the cockpit addon for openHAB. A later update can be done within the web application.
 
-1. Clone the repo
+1. Clone the repo and browse to the folder
 ```
-git clone https://github.com/flo-mic/openHAB-cockpit.git
+sudo git clone https://github.com/flo-mic/openHAB-cockpit.git /opt/openhab-cockpit
+cd /opt/openhab-cockpit
 ```
-2. Copy the required files
+2. Change the file permission for the shell scripts so that they are executable
 ```
-sudo mkdir -p /usr/share/cockpit/openhab
-sudo cp -r openHAB-cockpit/dist/* /usr/share/cockpit/openhab
-sudo mkdir -p /usr/share/metainfo/
-sudo cp openHAB-cockpit/org.cockpit-project.openhab.metainfo.xml /usr/share/metainfo/
+cd openhab-cockpit
+sudo chmod +x src/scripts/*.sh && sudo cp -r dist/*
 ```
-3. Remove the temporary folder
+3. Add the app to the known app list of cockpit
 ```
-sudo rm -r openHAB-cockpit/
+sudo ln -s /opt/openhab-cockpit/org.cockpit-project.openhab.metainfo.xml /usr/share/metainfo/org.cockpit-project.openhab.metainfo.xml
 ```
 
 You can not access your cockpit under **https://openhabiandevice:9090**
