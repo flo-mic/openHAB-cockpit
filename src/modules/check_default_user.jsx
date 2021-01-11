@@ -14,7 +14,7 @@ export default class CheckDefaultUser extends React.Component {
         var proc = cockpit.spawn(["./checkDefaultUserPassword.sh"], {
             superuser: "require",
             err: "out",
-            directory: "/usr/share/cockpit/openhab/scripts",
+            directory: "/opt/openhab-cockpit/src/scripts",
         });
         proc.then((data) => {
             if (data.includes("Default password detected!")) {
@@ -60,7 +60,7 @@ export default class CheckDefaultUser extends React.Component {
             {
                 superuser: "require",
                 err: "out",
-                directory: "/usr/share/cockpit/openhab/scripts",
+                directory: "/opt/openhab-cockpit/src/scripts",
             }
         );
         proc.then((data) => {
@@ -85,26 +85,6 @@ export default class CheckDefaultUser extends React.Component {
                 changeSuccesfull: false,
             });
         });
-    }
-
-    set_event_Handler() {
-        if (this.props.showModal) {
-            document.addEventListener("click", this.handleClickOutsideModal, false);
-            document.addEventListener("keydown", this.handleModalEscKeyEvent, false);
-            this.setState({ prevStateShow: this.props.showModal });
-        } else {
-            document.removeEventListener(
-                "click",
-                this.handleClickOutsideModal,
-                false
-            );
-            document.removeEventListener(
-                "keydown",
-                this.handleModalEscKeyEvent,
-                false
-            );
-            this.setState({ prevStateShow: this.props.show });
-        }
     }
 
     constructor() {
@@ -166,6 +146,11 @@ export default class CheckDefaultUser extends React.Component {
 
     componentDidMount() {
         this.checkForDefaultPassword();
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("click", this.handleClickOutsideModal, false);
+        document.removeEventListener("keydown", this.handleModalEscKeyEvent, false);
     }
 
     render() {
