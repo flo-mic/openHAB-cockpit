@@ -27,7 +27,7 @@ export class Application extends React.Component {
                     <main role="main" className="pf-c-page__main" tabIndex="-1">
                         <section className="pf-c-page__main-section pf-m-light ct-overview-header">
                             <div className="ct-overview-header-hostname">
-                                <h1>openHAB Cockpit ()</h1>
+                                <h1>openHAB Cockpit</h1>
                             </div>
                         </section>
                         <section className="pf-c-page__main-section">
