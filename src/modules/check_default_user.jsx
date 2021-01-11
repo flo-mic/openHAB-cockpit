@@ -2,6 +2,8 @@ import React from "react";
 import cockpit from "cockpit";
 import ReactDOM from "react-dom";
 import { Alert, TextInput } from "@patternfly/react-core";
+import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../custom.scss";
 import "../components/modal.scss";
@@ -22,7 +24,6 @@ export default class CheckDefaultUser extends React.Component {
                 });
                 return;
             }
-            // this.setState({ defaultPasswordChanged: true });
             this.setState({ defaultPasswordChanged: true });
         });
         proc.catch((exception, data) => {
@@ -66,6 +67,7 @@ export default class CheckDefaultUser extends React.Component {
             console.log("Password updated.\n" + data);
             this.setState({
                 showSuccessMessage: true,
+                changeSuccesfull: !data.includes("error"),
             });
             this.checkForDefaultPassword();
         });
@@ -78,6 +80,10 @@ export default class CheckDefaultUser extends React.Component {
           "\n\n Exception: \n" +
           exception
             );
+            this.setState({
+                showSuccessMessage: true,
+                changeSuccesfull: false,
+            });
         });
     }
 
@@ -113,6 +119,7 @@ export default class CheckDefaultUser extends React.Component {
             confirmNewPassword: "",
             displayInvalidPasswordMessage: "display-none",
             showSuccessMessage: false,
+            changeSuccesfull: true,
         };
         this.handleModalShow = (e) => {
             if (this.state.showModal == true) {
@@ -182,6 +189,14 @@ export default class CheckDefaultUser extends React.Component {
             ? "display-none"
             : "display-block";
 
+        const displaySuccess = this.state.changeSuccesfull
+            ? "display-block fa-5x success-icon"
+            : "display-none";
+
+        const displayError = this.state.changeSuccesfull
+            ? "display-none"
+            : "display-block fa-5x failure-icon";
+
         return (
             <div>
                 <div className={showDefaultPasswordWarning}>
@@ -215,7 +230,7 @@ export default class CheckDefaultUser extends React.Component {
                         >
                             <div className="modal-header">
                                 <div className="justify-content-space-between">
-                                    <div className={hidePasswordDialog}>
+                                    <div>
                                         <h4 className="modal-title">
                                             Change user password of {this.state.defaultUser}
                                         </h4>
@@ -261,12 +276,14 @@ export default class CheckDefaultUser extends React.Component {
                                     </div>
                                     <div className={this.state.displayInvalidPasswordMessage}>
                                         <label style={{ padding: "0.5rem", color: "red" }}>
-                                            Passwords did not match!
+                                            Passwords empty or did not match!
                                         </label>
                                     </div>
-                                    <div className="div-full-center">
+                                    <div
+                    style={{ paddingTop: "0.5rem" }}
+                    className="div-full-center"
+                                    >
                                         <button
-                      style={{ paddingTop: "0.5rem" }}
                       className="pf-c-button pf-m-primary"
                       onClick={(e) => {
                           this.setPassword();
@@ -278,7 +295,27 @@ export default class CheckDefaultUser extends React.Component {
                                 </div>
                                 <div className={showSuccessMessage}>
                                     <div className="div-full-center">
-                                        <h3>Password changed.</h3>
+                                        <FontAwesomeIcon
+                      className={displaySuccess}
+                      icon={faCheckCircle}
+                                        />
+                                        <FontAwesomeIcon
+                      className={displayError}
+                      icon={faExclamationCircle}
+                                        />
+                                    </div>
+                                    <div
+                    style={{ paddingTop: "0.5rem" }}
+                    className="div-full-center"
+                                    >
+                                        <button
+                      className="pf-c-button pf-m-primary"
+                      onClick={(e) => {
+                          this.handleModalShow();
+                      }}
+                                        >
+                                            Close
+                                        </button>
                                     </div>
                                 </div>
                             </div>

@@ -1,5 +1,7 @@
 import React from "react";
 import cockpit from "cockpit";
+import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../custom.scss";
 import "../components/modal.scss";
@@ -17,6 +19,7 @@ export default class OHBranchSelector extends React.Component {
             showBranchSelector: true,
             showInstallationDone: false,
             message: "",
+            changeSuccesfull: true,
         };
         this.handleSelectionChange = (e) => {
             this.resetSelection();
@@ -67,12 +70,12 @@ export default class OHBranchSelector extends React.Component {
             directory: "/usr/share/cockpit/openhab/scripts",
         });
         proc.then((data) => {
-            this.setState({ message: data });
+            this.setState({ message: data, changeSuccesfull: !data.includes("Error") });
             this.openInstallationDone();
         });
         proc.catch((exception, data) => {
             console.error("Error while installing " + openhab + " from branch (" + branch + ").\nException: " + exception + "\n\nOutput: " + data);
-            this.setState({ message: "Error while installing " + openhab + " from branch (" + branch + ").\nException:" + exception + "\n\nOutput:" + data });
+            this.setState({ changeSuccesfull: false, message: "Error while installing " + openhab + " from branch (" + branch + ").\nException:" + exception + "\n\nOutput:" + data });
             this.openInstallationDone();
         });
     }
@@ -111,6 +114,15 @@ export default class OHBranchSelector extends React.Component {
         const showOutput = this.state.showOutput
             ? " display-block console-text"
             : "display-none";
+
+        const displaySuccess = this.state.changeSuccesfull
+            ? "display-block fa-5x success-icon"
+            : "display-none";
+
+        const displayError = this.state.changeSuccesfull
+            ? "display-none"
+            : "display-block fa-5x failure-icon";
+
         return (
             <div>
                 <div className={showInstallingSpinner}>
@@ -143,6 +155,16 @@ export default class OHBranchSelector extends React.Component {
                         <h3 className="display-flex-center-body">
                             installation done.
                         </h3>
+                    </div>
+                    <div className="div-full-center">
+                        <FontAwesomeIcon
+                      className={displaySuccess}
+                      icon={faCheckCircle}
+                        />
+                        <FontAwesomeIcon
+                      className={displayError}
+                      icon={faExclamationCircle}
+                        />
                     </div>
                     <div className="display-flex-center">
                         <div className="display-flex-center-body">

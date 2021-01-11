@@ -3,7 +3,6 @@ import cockpit from "cockpit";
 import ReactDOM from "react-dom";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { TextInput } from "@patternfly/react-core";
-// get our fontawesome imports
 import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
