@@ -77,7 +77,7 @@ export default class CheckDefaultUser extends React.Component {
             this.setState({
                 showSuccessMessage: true,
                 changeSuccesfull: false,
-                resultMessage: MessageChannel,
+                resultMessage: message,
             });
         });
     }
