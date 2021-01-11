@@ -68,7 +68,8 @@ clean:
 	[ ! -e cockpit-$(PACKAGE_NAME).spec.in ] || rm -f cockpit-$(PACKAGE_NAME).spec
 
 install: $(WEBPACK_TEST)
-	cp -r src/scripts dist/					
+	cp -r src/scripts* /opt/openhab-cockpit/src/scripts/
+	sudo chmod +x /opt/openhab-cockpit/src/scripts/*.sh
 	mkdir -p $(DESTDIR)/usr/share/cockpit/$(PACKAGE_NAME)
 	cp -r dist/* $(DESTDIR)/usr/share/cockpit/$(PACKAGE_NAME)
 	mkdir -p $(DESTDIR)/usr/share/metainfo/
