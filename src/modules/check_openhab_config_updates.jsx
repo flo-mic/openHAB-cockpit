@@ -43,29 +43,38 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
 
     // updates the openHAB-cockpit
     update() {
-        this.setState({ installingUpdates: true });
-        var proc = cockpit.spawn(["git", "fetch"], {
-            superuser: "require",
-            err: "out",
-            directory: "/opt/openhab-cockpit",
-        });
-        proc.then((data) => {
-            console.log("New updates for openHAB-cockpit installed.\n" + data);
-            this.setState({
-                installingUpdates: false,
-                showFinalDialog: true,
-                showSuccessIcon: !data.includes("error"),
+        this.setState({ showUpdateButton: false, installingUpdates: true }, () => {
+            var proc = cockpit.spawn(["git", "fetch"], {
+                superuser: "require",
+                err: "out",
+                directory: "/opt/openhab-cockpit",
             });
-            this.checkForUpdates();
-        });
-        proc.catch((exception, data) => {
-            var message = "Could not install the latest openHAB-cockpit updates. Readed data: \n" + data + "\n\n Exception: \n" + exception;
-            console.error(message);
-            this.setState({
-                installingUpdates: false,
-                showFinalDialog: true,
-                showSuccessIcon: false,
-                resultMessage: message,
+            proc.then((data) => {
+                console.log("New updates for openHAB-cockpit installed.\n" + data);
+                this.setState(
+                    {
+                        installingUpdates: false,
+                        showFinalDialog: true,
+                        showSuccessIcon: !data.includes("error"),
+                    },
+                    () => {
+                        this.checkForUpdates();
+                    }
+                );
+            });
+            proc.catch((exception, data) => {
+                var message =
+          "Could not install the latest openHAB-cockpit updates. Readed data: \n" +
+          data +
+          "\n\n Exception: \n" +
+          exception;
+                console.error(message);
+                this.setState({
+                    installingUpdates: false,
+                    showFinalDialog: true,
+                    showSuccessIcon: false,
+                    resultMessage: message,
+                });
             });
         });
     }
@@ -81,6 +90,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
             installingUpdates: false,
             showFinalDialog: false,
             showSuccessIcon: true,
+            showUpdateButton: true,
             showModal: false,
             headerModal: <div />,
             bodyModal: <div />,
@@ -149,7 +159,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
             ? "display-block"
             : "display-none";
 
-        const hideUpdateButton = this.state.showFinalDialog
+        const hideUpdateButton = !this.state.showUpdateButton
             ? "display-none"
             : "display-block";
 
@@ -233,9 +243,9 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                                     <div className="display-flex-center">
                                         <div className="display-flex-center-body">
                                             <span
-                className="pf-c-spinner"
-                role="progressbar"
-                aria-valuetext="Loading..."
+                        className="pf-c-spinner"
+                        role="progressbar"
+                        aria-valuetext="Loading..."
                                             >
                                                 <span className="pf-c-spinner__clipper" />
                                                 <span className="pf-c-spinner__lead-ball" />
