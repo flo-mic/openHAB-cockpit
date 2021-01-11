@@ -14,7 +14,7 @@ export default class CheckDefaultUser extends React.Component {
         var proc = cockpit.spawn(["./checkDefaultUserPassword.sh"], {
             superuser: "require",
             err: "out",
-            directory: "/usr/share/cockpit/openhab/scripts",
+            directory: "/opt/openhab-cockpit/src/scripts",
         });
         proc.then((data) => {
             if (data.includes("Default password detected!")) {
@@ -60,7 +60,7 @@ export default class CheckDefaultUser extends React.Component {
             {
                 superuser: "require",
                 err: "out",
-                directory: "/usr/share/cockpit/openhab/scripts",
+                directory: "/opt/openhab-cockpit/src/scripts",
             }
         );
         proc.then((data) => {
@@ -72,39 +72,14 @@ export default class CheckDefaultUser extends React.Component {
             this.checkForDefaultPassword();
         });
         proc.catch((exception, data) => {
-            console.error(
-                "Could not change the default password of user '" +
-          this.state.defaultUser +
-          "'. Readed data: \n" +
-          data +
-          "\n\n Exception: \n" +
-          exception
-            );
+            var message = "Could not change the default password of user '" + this.state.defaultUser + "'. Readed data: \n" + data + "\n\n Exception: \n" + exception;
+            console.error(message);
             this.setState({
                 showSuccessMessage: true,
                 changeSuccesfull: false,
+                resultMessage: MessageChannel,
             });
         });
-    }
-
-    set_event_Handler() {
-        if (this.props.showModal) {
-            document.addEventListener("click", this.handleClickOutsideModal, false);
-            document.addEventListener("keydown", this.handleModalEscKeyEvent, false);
-            this.setState({ prevStateShow: this.props.showModal });
-        } else {
-            document.removeEventListener(
-                "click",
-                this.handleClickOutsideModal,
-                false
-            );
-            document.removeEventListener(
-                "keydown",
-                this.handleModalEscKeyEvent,
-                false
-            );
-            this.setState({ prevStateShow: this.props.show });
-        }
     }
 
     constructor() {
@@ -120,6 +95,7 @@ export default class CheckDefaultUser extends React.Component {
             displayInvalidPasswordMessage: "display-none",
             showSuccessMessage: false,
             changeSuccesfull: true,
+            resultMessage: "",
         };
         this.handleModalShow = (e) => {
             if (this.state.showModal == true) {
@@ -166,6 +142,11 @@ export default class CheckDefaultUser extends React.Component {
 
     componentDidMount() {
         this.checkForDefaultPassword();
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("click", this.handleClickOutsideModal, false);
+        document.removeEventListener("keydown", this.handleModalEscKeyEvent, false);
     }
 
     render() {
@@ -303,6 +284,12 @@ export default class CheckDefaultUser extends React.Component {
                       className={displayError}
                       icon={faExclamationCircle}
                                         />
+                                    </div>
+                                    <div
+                    style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                    className="div-full-center"
+                                    >
+                                        <h4>{this.state.resultMessage}</h4>
                                     </div>
                                     <div
                     style={{ paddingTop: "0.5rem" }}

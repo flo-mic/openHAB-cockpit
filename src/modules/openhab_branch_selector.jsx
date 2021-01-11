@@ -67,7 +67,7 @@ export default class OHBranchSelector extends React.Component {
         var proc = cockpit.spawn(["./openhab-setup.sh", openhab, branch], {
             superuser: "require",
             err: "out",
-            directory: "/usr/share/cockpit/openhab/scripts",
+            directory: "/opt/openhab-cockpit/src/scripts",
         });
         proc.then((data) => {
             this.setState({ message: data, changeSuccesfull: !data.includes("Error") });

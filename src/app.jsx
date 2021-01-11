@@ -3,6 +3,7 @@ import React from "react";
 import OHStatus from "./openhab-status.jsx";
 import Tools from "./tools.jsx";
 import CheckDefaultUser from "./modules/check_default_user.jsx";
+import CheckOpenHABCockpitUpdates from "./modules/check_openhab_config_updates.jsx";
 import "./app.scss";
 import "./custom.scss";
 
@@ -31,6 +32,7 @@ export class Application extends React.Component {
                         </section>
                         <section className="pf-c-page__main-section">
                             <CheckDefaultUser />
+                            <CheckOpenHABCockpitUpdates />
                             <div id="gallery" className="pf-l-gallery pf-m-gutter">
                                 <OHStatus />
                                 <Tools />

@@ -124,7 +124,7 @@ export class OHStatus extends React.Component {
         var proc = cockpit.spawn(["./openhab2-isInstalled.sh"], {
             superuser: "require",
             err: "out",
-            directory: "/usr/share/cockpit/openhab/scripts",
+            directory: "/opt/openhab-cockpit/src/scripts",
         });
         proc.then((data) => {
             if (data.includes("openHAB2")) {

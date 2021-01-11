@@ -46,6 +46,11 @@ export default class Modal extends React.Component {
         this.set_event_Handler();
     }
 
+    componentWillUnmount() {
+        document.removeEventListener("click", this.handleClickOutsideModal, false);
+        document.removeEventListener("keydown", this.handleModalEscKeyEvent, false);
+    }
+
     render() {
         const classesModalFooter = this.props.showCloseButton
             ? "display-block modal-footer"

@@ -124,7 +124,7 @@ export default class OHStatus extends React.Component {
         var proc = cockpit.spawn(["./openhab2-isInstalled.sh"], {
             superuser: "require",
             err: "out",
-            directory: "/usr/share/cockpit/openhab/scripts",
+            directory: "/opt/openhab-cockpit/src/scripts",
         });
         proc.then((data) => {
             if (data.includes("openHAB2")) {
@@ -201,7 +201,7 @@ export default class OHStatus extends React.Component {
     /* Runs when component is build */
     componentDidMount() {
         this.get_details();
-        this.interval = setInterval(() => this.get_details(), 5000);
+        this.interval = setInterval(() => this.get_details(), 15000);
     }
 
     componentWillUnmount() {
