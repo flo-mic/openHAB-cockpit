@@ -62,7 +62,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                     {
                         installingUpdates: false,
                         showFinalDialog: true,
-                        showSuccessIcon: !data.includes("error"),
+                        showSuccessIcon: !(data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")),
                     },
                     () => {
                         this.checkForUpdates();
@@ -95,8 +95,6 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
             showSuccessIcon: true,
             showUpdateButton: true,
             showModal: false,
-            headerModal: <div />,
-            bodyModal: <div />,
             resultMessage: "Update done. In order to see the latest updates please reload this page with \"Strg\" + \"F5\".",
         };
         this.handleModalShow = (e) => {
@@ -277,7 +275,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                     style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     className="div-full-center"
                                     >
-                                        <h4>{this.state.handleModalShow}</h4>
+                                        <p>{this.state.resultMessage}</p>
                                     </div>
                                     <div
                     style={{ paddingTop: "0.5rem" }}
@@ -286,7 +284,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                                         <button
                       className="pf-c-button pf-m-primary"
                       onClick={(e) => {
-                          this.refreshPage();
+                          this.handleModalShow();
                       }}
                                         >
                                             Close

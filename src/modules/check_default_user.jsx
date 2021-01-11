@@ -28,7 +28,7 @@ export default class CheckDefaultUser extends React.Component {
         });
         proc.catch((exception, data) => {
             console.error(
-                "Error while verifying the default openhabian/pi password. Readed data: \n" +
+                "Error while verifying the default openhabian/pi password. Output: \n" +
           data +
           "\n\n Exception: \n" +
           exception
@@ -72,7 +72,7 @@ export default class CheckDefaultUser extends React.Component {
             this.checkForDefaultPassword();
         });
         proc.catch((exception, data) => {
-            var message = "Could not change the default password of user '" + this.state.defaultUser + "'. Readed data: \n" + data + "\n\n Exception: \n" + exception;
+            var message = "Could not change the default password of user '" + this.state.defaultUser + "'. Output: \n" + data + "\n\n Exception: \n" + exception;
             console.error(message);
             this.setState({
                 showSuccessMessage: true,
@@ -87,8 +87,6 @@ export default class CheckDefaultUser extends React.Component {
         this.state = {
             defaultPasswordChanged: true,
             showModal: false,
-            headerModal: <div />,
-            bodyModal: <div />,
             defaultUser: "openhabian",
             newPassword: "",
             confirmNewPassword: "",
@@ -289,7 +287,7 @@ export default class CheckDefaultUser extends React.Component {
                     style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     className="div-full-center"
                                     >
-                                        <h4>{this.state.resultMessage}</h4>
+                                        <p>{this.state.resultMessage}</p>
                                     </div>
                                     <div
                     style={{ paddingTop: "0.5rem" }}

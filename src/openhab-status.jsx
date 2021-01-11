@@ -201,7 +201,7 @@ export default class OHStatus extends React.Component {
     /* Runs when component is build */
     componentDidMount() {
         this.get_details();
-        this.interval = setInterval(() => this.get_details(), 15000);
+        this.interval = setInterval(() => this.get_oh_service_status(), 15000);
     }
 
     componentWillUnmount() {

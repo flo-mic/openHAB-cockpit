@@ -70,7 +70,7 @@ export default class OHBranchSelector extends React.Component {
             directory: "/opt/openhab-cockpit/src/scripts",
         });
         proc.then((data) => {
-            this.setState({ message: data, changeSuccesfull: !data.includes("Error") });
+            this.setState({ message: data, changeSuccesfull: !(data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) });
             this.openInstallationDone();
         });
         proc.catch((exception, data) => {

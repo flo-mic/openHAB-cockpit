@@ -1,39 +1,19 @@
 import React from "react";
 import LogViewer from "./modules/logviewer.jsx";
+import OpenHABianApplyImprovements from "./modules/openhabian_apply_improvements.jsx";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
 
 import "./custom.scss";
 import "./components/patternfly.scss";
 
 export default class Tools extends React.Component {
-    get_details() {
-        this.getInstalledopenHAB();
-        this.get_oh_service_status();
-        this.get_oh_cli_details();
-        this.get_oh_selected_branch();
-    }
-
     constructor() {
         super();
         this.state = {
             showLogViewer: false,
+            showApplyImprovements: false,
             LogViewerContent: <div />,
-            showModal: false,
-            headerModal: <div />,
-            bodyModal: <div />,
-            disableModalClose: false,
-        };
-        /* Modal action handler start */
-        this.handleModalShow = (e) => {
-            if (this.state.showModal) this.get_details();
-            this.setState({
-                showModal: !this.state.showModal,
-            });
-        };
-        this.handleDisableModalClose = (e) => {
-            this.setState({
-                disableModalClose: !this.state.disableModalClose,
-            });
+            ApplyImprovmentsContent: <div />,
         };
         this.handleLogViewer = (e) => {
             if (this.state.showLogViewer == false) {
@@ -42,8 +22,13 @@ export default class Tools extends React.Component {
                 this.setState({ showLogViewer: false, LogViewerContent: <div /> });
             }
         };
-
-    /* Modal action handler end */
+        this.handleImprovements = (e) => {
+            if (this.state.showApplyImprovements == false) {
+                this.setState({ showApplyImprovements: true, ApplyImprovmentsContent: <OpenHABianApplyImprovements onClose={this.handleImprovements} /> });
+            } else {
+                this.setState({ showApplyImprovements: false, ApplyImprovmentsContent: <div /> });
+            }
+        };
     }
 
     /* Runs when component is build */
@@ -59,6 +44,7 @@ export default class Tools extends React.Component {
                 <CardTitle>Tools</CardTitle>
                 <CardBody>
                     <div>{this.state.LogViewerContent}</div>
+                    <div>{this.state.ApplyImprovmentsContent}</div>
                     <table className="pf-c-table pf-m-grid-md pf-m-compact">
                         <tbody>
                             <tr>
@@ -69,6 +55,17 @@ export default class Tools extends React.Component {
                      }}
                                     >
                                         LogViewer
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a
+                     onClick={(e) => {
+                         this.handleImprovements();
+                     }}
+                                    >
+                                        Apply Improvements
                                     </a>
                                 </td>
                             </tr>
