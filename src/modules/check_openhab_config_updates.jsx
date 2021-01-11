@@ -47,7 +47,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
             var proc = cockpit.spawn(["rm", "-r", "/opt/openhab-cockpit", "&&", "git", "clone", "https://github.com/flo-mic/openHAB-cockpit.git", "/opt/openhab-cockpit", "&&", "chmod", "+x", "openhab-cockpit/src/scripts/*.sh", "&&", "cp", "-r", "openhab-cockpit/dist/*", "/usr/share/cockpit/openhab/"], {
                 superuser: "require",
                 err: "out",
-                directory: "/opt/openhab-cockpit",
+                directory: "/opt",
             });
             proc.then((data) => {
                 console.log("New updates for openHAB-cockpit installed.\n" + data);
