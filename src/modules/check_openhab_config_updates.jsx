@@ -86,10 +86,6 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
         });
     }
 
-    refreshPage() {
-        window.location.reload();
-    }
-
     constructor() {
         super();
         this.state = {
@@ -101,7 +97,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
             showModal: false,
             headerModal: <div />,
             bodyModal: <div />,
-            resultMessage: "Update done. Please refresh the application.",
+            resultMessage: "Update done. In order to see the latest updates please reload this page with \"Strg\" + \"F5\".",
         };
         this.handleModalShow = (e) => {
             if (this.state.showModal == true) {
@@ -281,7 +277,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                     style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     className="div-full-center"
                                     >
-                                        <h4>{this.state.resultMessage}</h4>
+                                        <h4>{this.state.handleModalShow}</h4>
                                     </div>
                                     <div
                     style={{ paddingTop: "0.5rem" }}
@@ -293,7 +289,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                           this.refreshPage();
                       }}
                                         >
-                                            Refresh application
+                                            Close
                                         </button>
                                     </div>
                                 </div>
