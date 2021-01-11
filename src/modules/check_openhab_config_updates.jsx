@@ -47,7 +47,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
             var proc = cockpit.script(`
                 rm -r /opt/openhab-cockpit
                 git clone https://github.com/flo-mic/openHAB-cockpit.git /opt/openhab-cockpit
-                cd openHAB-cockpit
+                cd openhab-cockpit
                 chmod +x src/scripts/*.sh
                 mkdir -p /usr/share/cockpit/openhab
                 cp -r dist/* /usr/share/cockpit/openhab
