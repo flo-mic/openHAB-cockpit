@@ -43,6 +43,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
 
     // updates the openHAB-cockpit
     update() {
+        this.setState({ installingUpdates: true });
         var proc = cockpit.spawn(["git", "fetch"], {
             superuser: "require",
             err: "out",
@@ -51,38 +52,39 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
         proc.then((data) => {
             console.log("New updates for openHAB-cockpit installed.\n" + data);
             this.setState({
+                installingUpdates: false,
                 showFinalDialog: true,
                 showSuccessIcon: !data.includes("error"),
             });
             this.checkForUpdates();
         });
         proc.catch((exception, data) => {
-            console.error(
-                "Could not install the latest openHAB-cockpit updates. Readed data: \n" +
-          data +
-          "\n\n Exception: \n" +
-          exception
-            );
+            var message = "Could not install the latest openHAB-cockpit updates. Readed data: \n" + data + "\n\n Exception: \n" + exception;
+            console.error(message);
             this.setState({
+                installingUpdates: false,
                 showFinalDialog: true,
                 showSuccessIcon: false,
+                resultMessage: message,
             });
         });
     }
 
     refreshPage() {
-        window.location.reload(true);
+        window.location.reload();
     }
 
     constructor() {
         super();
         this.state = {
             updatesAvailable: false,
+            installingUpdates: false,
             showFinalDialog: false,
             showSuccessIcon: true,
             showModal: false,
             headerModal: <div />,
             bodyModal: <div />,
+            resultMessage: "Update done. Please refresh the application.",
         };
         this.handleModalShow = (e) => {
             if (this.state.showModal == true) {
@@ -128,6 +130,10 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
 
     render() {
         const showUpdatesAvailable = this.state.updatesAvailable
+            ? "display-block"
+            : "display-none";
+
+        const showInstallingSpinner = this.state.installingUpdates
             ? "display-block"
             : "display-none";
 
@@ -218,6 +224,31 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                                         </button>
                                     </div>
                                 </div>
+                                <div className={showInstallingSpinner}>
+                                    <div className="display-flex-center">
+                                        <h3 className="display-flex-center-body">
+                                            installation running...
+                                        </h3>
+                                    </div>
+                                    <div className="display-flex-center">
+                                        <div className="display-flex-center-body">
+                                            <span
+                className="pf-c-spinner"
+                role="progressbar"
+                aria-valuetext="Loading..."
+                                            >
+                                                <span className="pf-c-spinner__clipper" />
+                                                <span className="pf-c-spinner__lead-ball" />
+                                                <span className="pf-c-spinner__tail-ball" />
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="display-flex-center">
+                                        <p className="display-flex-center-body">
+                                            This installation will need some time, please wait.
+                                        </p>
+                                    </div>
+                                </div>
                                 <div className={showDoneMessage}>
                                     <div className="div-full-center">
                                         <FontAwesomeIcon
@@ -230,10 +261,10 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                                         />
                                     </div>
                                     <div
-                    style={{ paddingTop: "0.5rem" }}
+                    style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     className="div-full-center"
                                     >
-                                        <h4>Update done. Please refresh the application.</h4>
+                                        <h4>{this.state.resultMessage}</h4>
                                     </div>
                                     <div
                     style={{ paddingTop: "0.5rem" }}
