@@ -1,15 +1,18 @@
 import React from "react";
 import cockpit from "cockpit";
-import ReactDOM from "react-dom";
+import Modal from "../components/modal.jsx";
 import { Alert, TextInput } from "@patternfly/react-core";
-import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+    faCheckCircle,
+    faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../custom.scss";
-import "../components/modal.scss";
 import "../patternfly.scss";
 
 export default class CheckDefaultUser extends React.Component {
+    // check if the system runs with default openhabian/pi password
     checkForDefaultPassword() {
         var proc = cockpit.spawn(["./checkDefaultUserPassword.sh"], {
             superuser: "require",
@@ -36,36 +39,48 @@ export default class CheckDefaultUser extends React.Component {
         });
     }
 
+    // check new password if complex and valid. if yes run change password
     setPassword() {
-        if (this.state.newPassword !== "" && this.state.newPassword === this.state.confirmNewPassword) {
+        if (
+            this.state.newPassword !== "" &&
+      this.state.newPassword === this.state.confirmNewPassword
+        ) {
             if (this.checkPasswordStrength(this.state.newPassword) == true) {
-                this.setState({ displayInvalidPasswordMessage: "display-none" });
+                this.setState({ displayInvalidPassword: false });
                 this.cmdChangePassword();
             } else {
-                this.setState({ displayInvalidPasswordMessage: "display-block div-full-center", invalidPasswordMessage: "The password must contain 8 characters and special characters" });
+                this.setState({
+                    displayInvalidPassword: true,
+                    invalidPasswordMessage:
+            "The password must contain 8 characters and special characters",
+                });
             }
         } else {
             if (this.checkPasswordStrength)
                 this.setState({
-                    displayInvalidPasswordMessage: "display-block div-full-center",
+                    displayInvalidPassword: true,
                     invalidPasswordMessage: "Passwords empty or do not match.",
                 });
         }
     }
 
+    // check for password complexity
     checkPasswordStrength(password) {
-        if (/.{8,}/.test(password) * (/* at least 8 characters */
-            /.{12,}/.test(password) + /* bonus if longer */
-            /[a-z]/.test(password) + /* a lower letter */
-            /[A-Z]/.test(password) + /* a upper letter */
-            /\d/.test(password) + /* a digit */
-            /[^A-Za-z0-9]/.test(password) /* a special character */
-        ) >= 4) {
+        if (
+            /.{8,}/.test(password) /* at least 8 characters */ *
+        (/.{12,}/.test(password) /* bonus if longer */ +
+          /[a-z]/.test(password) /* a lower letter */ +
+          /[A-Z]/.test(password) /* a upper letter */ +
+          /\d/.test(password) /* a digit */ +
+          /[^A-Za-z0-9]/.test(password)) /* a special character */ >=
+      4
+        ) {
             return true;
         }
         return false;
     }
 
+    // changes the password of the openhabian or pi user
     cmdChangePassword() {
         var proc = cockpit.spawn(
             [
@@ -83,16 +98,25 @@ export default class CheckDefaultUser extends React.Component {
             console.log("Password updated.\n" + data);
             this.setState({
                 showSuccessMessage: true,
-                changeSuccesfull: !data.includes("error"),
+                successful: !(
+                    data.toLowerCase().includes("error") ||
+          data.toLowerCase().includes("failed")
+                ),
             });
             this.checkForDefaultPassword();
         });
         proc.catch((exception, data) => {
-            var message = "Could not change the default password of user '" + this.state.defaultUser + "'. Output: \n" + data + "\n\n Exception: \n" + exception;
+            var message =
+        "Could not change the default password of user '" +
+        this.state.defaultUser +
+        "'. Output: \n" +
+        data +
+        "\n\n Exception: \n" +
+        exception;
             console.error(message);
             this.setState({
                 showSuccessMessage: true,
-                changeSuccesfull: false,
+                successful: false,
                 resultMessage: message,
             });
         });
@@ -106,53 +130,34 @@ export default class CheckDefaultUser extends React.Component {
             defaultUser: "openhabian",
             newPassword: "",
             confirmNewPassword: "",
-            displayInvalidPasswordMessage: "display-none",
+            displayInvalidPassword: false,
+            invalidPasswordMessage: "Passwords empty or do not match.",
+            disableModalClose: false,
             showSuccessMessage: false,
-            changeSuccesfull: true,
+            successful: true,
             resultMessage: "",
-            invalidPasswordMessage: "Passwords empty or do not match."
         };
+        // handles the modal open and close
         this.handleModalShow = (e) => {
-            if (this.state.showModal == true) {
-                document.removeEventListener(
-                    "click",
-                    this.handleClickOutsideModal,
-                    false
-                );
-                document.removeEventListener(
-                    "keydown",
-                    this.handleKeyEvent,
-                    false
-                );
-            } else {
-                document.addEventListener("click", this.handleClickOutsideModal, false);
-                document.addEventListener(
-                    "keydown",
-                    this.handleKeyEvent,
-                    false
-                );
-            }
             this.setState({
-                showModal: !this.state.showModal, showSuccessMessage: false, newPassword: "", confirmNewPassword: "",
+                showModal: !this.state.showModal,
+                showSuccessMessage: false,
+                newPassword: "",
+                confirmNewPassword: "",
+                displayInvalidPassword: false
             });
         };
+        // sends ui input of password field
         this.handleNewPasswordText = (e) => {
             this.setState({
                 newPassword: e,
             });
         };
+        // sends ui input of confirm password field
         this.handleConfirmNewPasswordText = (e) => {
             this.setState({
                 confirmNewPassword: e,
             });
-        };
-        this.handleClickOutsideModal = (e) => {
-            const domNode = ReactDOM.findDOMNode(this.state.node);
-            if (!domNode.contains(e.target)) this.handleModalShow(e);
-        };
-        this.handleKeyEvent = (e) => {
-            if (e.keyCode == 27) this.handleModalShow(e);
-            if (e.keyCode == 13) this.setPassword(); // detect enter
         };
     }
 
@@ -160,23 +165,12 @@ export default class CheckDefaultUser extends React.Component {
         this.checkForDefaultPassword();
     }
 
-    componentWillUnmount() {
-        document.removeEventListener("click", this.handleClickOutsideModal, false);
-        document.removeEventListener("keydown", this.handleKeyEvent, false);
-    }
+    componentWillUnmount() {}
 
     render() {
         const showDefaultPasswordWarning = this.state.defaultPasswordChanged
             ? "display-none"
             : "display-block";
-
-        const showHideBackground = this.state.showModal
-            ? "modal-backdrop in"
-            : "display-none";
-
-        const showHideModal = this.state.showModal
-            ? "modal-container in"
-            : "modal display-none";
 
         const showSuccessMessage = this.state.showSuccessMessage
             ? "display-block"
@@ -186,11 +180,15 @@ export default class CheckDefaultUser extends React.Component {
             ? "display-none"
             : "display-block";
 
-        const displaySuccess = this.state.changeSuccesfull
+        const displayInvalidPassword = this.state.displayInvalidPassword
+            ? "display-block div-full-center"
+            : "display-none";
+
+        const displaySuccess = this.state.successful
             ? "display-block fa-5x success-icon"
             : "display-none";
 
-        const displayError = this.state.changeSuccesfull
+        const displayError = this.state.successful
             ? "display-none"
             : "display-block fa-5x failure-icon";
 
@@ -216,115 +214,82 @@ export default class CheckDefaultUser extends React.Component {
                         </p>
                     </Alert>
                 </div>
-                <div className={showHideBackground} />
-                <div className={showHideModal}>
-                    <div className="modal-dialog">
-                        <div
-              className="modal-content"
-              ref={(node) => {
-                  this.state.node = node;
-              }}
-                        >
-                            <div className="modal-header">
-                                <div className="justify-content-space-between">
-                                    <div>
-                                        <h4 className="modal-title">
-                                            Change user password of {this.state.defaultUser}
-                                        </h4>
-                                    </div>
-                                    <div>
-                                        <button
-                      className="pf-c-button close-button"
-                      type="button"
-                      onClick={(e) => {
-                          this.handleModalShow(e);
-                      }}
-                                        >
-                                            X
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="modal-body scroll">
-                                <div className={hidePasswordDialog}>
-                                    <div className="div-full-center">
-                                        <div style={{ Top: "0.5rem" }}>
-                                            <label style={{ width: "90px" }}>password:</label>
-                                            <TextInput
-                        style={{ display: "inline-block", width: "200px" }}
-                        value={this.state.newPassword}
-                        type="password"
-                        id="newpassword"
-                        onChange={this.handleNewPasswordText}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="div-full-center">
-                                        <div style={{ Top: "0.5rem" }}>
-                                            <label style={{ width: "90px" }}>confirm:</label>
-                                            <TextInput
-                        style={{ display: "inline-block", width: "200px" }}
-                        value={this.state.confirmNewPassword}
-                        type="password"
-                        id="confirmpassword"
-                        onChange={this.handleConfirmNewPasswordText}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className={this.state.displayInvalidPasswordMessage}>
-                                        <label style={{ padding: "0.5rem", color: "red" }}>
-                                            {this.state.invalidPasswordMessage}
-                                        </label>
-                                    </div>
-                                    <div
-                    style={{ paddingTop: "0.5rem" }}
-                    className="div-full-center"
-                                    >
-                                        <button
-                      className="pf-c-button pf-m-primary"
-                      onClick={(e) => {
-                          this.setPassword();
-                      }}
-                                        >
-                                            Set password
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className={showSuccessMessage}>
-                                    <div className="div-full-center">
-                                        <FontAwesomeIcon
-                      className={displaySuccess}
-                      icon={faCheckCircle}
-                                        />
-                                        <FontAwesomeIcon
-                      className={displayError}
-                      icon={faExclamationCircle}
-                                        />
-                                    </div>
-                                    <div
-                    style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
-                    className="div-full-center"
-                                    >
-                                        <p>{this.state.resultMessage}</p>
-                                    </div>
-                                    <br />
-                                    <div
-                    className="div-full-center"
-                                    >
-                                        <button
-                      className="pf-c-button pf-m-primary"
-                      onClick={(e) => {
-                          this.handleModalShow();
-                      }}
-                                        >
-                                            Close
-                                        </button>
-                                    </div>
-                                </div>
+                <Modal
+          disableModalClose={this.state.disableModalClose}
+          onClose={this.handleModalShow}
+          show={this.state.showModal}
+          header={"Change user password of " + this.state.defaultUser}
+                >
+                    <div className={hidePasswordDialog}>
+                        <div className="div-full-center">
+                            <div style={{ Top: "0.5rem" }}>
+                                <label style={{ width: "90px" }}>password:</label>
+                                <TextInput
+                  style={{ display: "inline-block", width: "200px" }}
+                  value={this.state.newPassword}
+                  type="password"
+                  id="newpassword"
+                  onChange={this.handleNewPasswordText}
+                                />
                             </div>
                         </div>
+                        <div className="div-full-center">
+                            <div style={{ Top: "0.5rem" }}>
+                                <label style={{ width: "90px" }}>confirm:</label>
+                                <TextInput
+                  style={{ display: "inline-block", width: "200px" }}
+                  value={this.state.confirmNewPassword}
+                  type="password"
+                  id="confirmpassword"
+                  onChange={this.handleConfirmNewPasswordText}
+                                />
+                            </div>
+                        </div>
+                        <div className={displayInvalidPassword}>
+                            <label style={{ padding: "0.5rem", color: "red" }}>
+                                {this.state.invalidPasswordMessage}
+                            </label>
+                        </div>
+                        <div style={{ paddingTop: "0.5rem" }} className="div-full-center">
+                            <button
+                className="pf-c-button pf-m-primary"
+                onClick={(e) => {
+                    this.setPassword();
+                }}
+                            >
+                                Set password
+                            </button>
+                        </div>
                     </div>
-                </div>
+                    <div className={showSuccessMessage}>
+                        <div className="div-full-center">
+                            <FontAwesomeIcon
+                className={displaySuccess}
+                icon={faCheckCircle}
+                            />
+                            <FontAwesomeIcon
+                className={displayError}
+                icon={faExclamationCircle}
+                            />
+                        </div>
+                        <div
+              style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+              className="div-full-center"
+                        >
+                            <p>{this.state.resultMessage}</p>
+                        </div>
+                        <div className="div-full-center">
+                            <button
+                className="pf-c-button pf-m-primary"
+                onClick={(e) => {
+                    this.handleModalShow();
+                }}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
             </div>
         );
     }

@@ -12,21 +12,22 @@ export default class Tools extends React.Component {
         this.state = {
             showLogViewer: false,
             showApplyImprovements: false,
-            LogViewerContent: <div />,
-            ApplyImprovmentsContent: <div />,
+            modalContent: <div />,
         };
+        // handles the modal dialog of the logviewer
         this.handleLogViewer = (e) => {
             if (this.state.showLogViewer == false) {
-                this.setState({ showLogViewer: true, LogViewerContent: <LogViewer onClose={this.handleLogViewer} showLogViewer={this.showLogViewer} /> });
+                this.setState({ showLogViewer: true, modalContent: <LogViewer onClose={this.handleLogViewer} /> });
             } else {
-                this.setState({ showLogViewer: false, LogViewerContent: <div /> });
+                this.setState({ showLogViewer: false, modalContent: <div /> });
             }
         };
+        // handles the modal dialog of improvments section
         this.handleImprovements = (e) => {
             if (this.state.showApplyImprovements == false) {
-                this.setState({ showApplyImprovements: true, ApplyImprovmentsContent: <OpenHABianApplyImprovements onClose={this.handleImprovements} /> });
+                this.setState({ showApplyImprovements: true, modalContent: <OpenHABianApplyImprovements onClose={this.handleImprovements} /> });
             } else {
-                this.setState({ showApplyImprovements: false, ApplyImprovmentsContent: <div /> });
+                this.setState({ showApplyImprovements: false, modalContent: <div /> });
             }
         };
     }
@@ -43,8 +44,7 @@ export default class Tools extends React.Component {
             <Card className="system-configuration">
                 <CardTitle>Tools</CardTitle>
                 <CardBody>
-                    <div>{this.state.LogViewerContent}</div>
-                    <div>{this.state.ApplyImprovmentsContent}</div>
+                    <div>{this.state.modalContent}</div>
                     <table className="pf-c-table pf-m-grid-md pf-m-compact">
                         <tbody>
                             <tr>

@@ -1,30 +1,111 @@
 import React from "react";
 import cockpit from "cockpit";
 import RadioBox from "../components/radio-box.jsx";
-import {
-    faCheckCircle,
-    faExclamationCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Modal from "../components/modal.jsx";
+import InstallationDialog from "../components/installation-dialog.jsx";
 
 import "../custom.scss";
-import "../components/modal.scss";
 import "../patternfly.scss";
 
 export default class OHBranchSelector extends React.Component {
+    // Start the installation with update button. Selects the defined branche
+    updateBranche() {
+        // check for valid oh version to avoid unexpected downgrade
+        if (this.props.openhab !== "openHAB3" && this.props.openhab !== "openHAB2") {
+            console.error("detected openHAB version was not properly detected. Can not run the branch update");
+            return;
+        }
+        if (this.state.branchRelease === true) {
+            this.installScript(this.props.openhab, "stable");
+        }
+        if (this.state.branchTesting === true) {
+            this.installScript(this.props.openhab, "testing");
+        }
+        if (this.state.branchSnapshot === true) {
+            this.installScript(this.props.openhab, "unstable");
+        }
+    }
+
+    installScript(openhab, branch) {
+        this.setState({ showMenu: false, disableModalClose: true, brancheToInstall: branch });
+        console.log("Installation of '" + openhab + "' branch '" + branch + "' started.");
+        var proc = cockpit.spawn(["./openhab-setup.sh", openhab, branch], {
+            superuser: "require",
+            err: "out",
+            directory: "/opt/openhab-cockpit/src/scripts",
+        });
+        proc.then((data) => {
+            this.setState({
+                consoleMessage: data,
+                disableModalClose: false,
+                showResult: true,
+                successful: !(
+                    data.toLowerCase().includes("error") ||
+          data.toLowerCase().includes("failed")
+                ),
+            });
+            console.log("installation of '" + openhab + "' branch '" + branch + "' done. Output: \n" + data);
+        });
+        proc.catch((exception, data) => {
+            console.error(
+                "Error while installing " +
+          openhab +
+          " from branch (" +
+          branch +
+          ").\nException: " +
+          exception +
+          "\n\nOutput: " +
+          data
+            );
+            this.setState({
+                successful: false,
+                disableModalClose: false,
+                showResult: true,
+                consoleMessage:
+          "Error while installing " +
+          openhab +
+          " from branch (" +
+          branch +
+          ").\nException:" +
+          exception +
+          "\n\nOutput:" +
+          data,
+            });
+        });
+    }
+
+    // Resets the radio checkbox on nes selection
+    resetSelection() {
+        this.setState({
+            branchRelease: false,
+            branchTesting: false,
+            branchSnapshot: false,
+        });
+    }
+
     constructor() {
         super();
         this.state = {
+            show: true,
             branchRelease: false,
             branchTesting: false,
             branchSnapshot: false,
             repo: "",
-            showLoading: false,
-            showBranchSelector: true,
-            showInstallationDone: false,
+            brancheToInstall: "",
+            showMenu: true,
+            showResult: false,
+            successful: false,
             consoleMessage: "",
-            changeSuccesfull: true,
+            disableModalClose: false,
         };
+
+        // handler for closing the modal
+        this.handleClose = (e) => {
+            if (!this.state.disableModalClose)
+                this.props.onClose && this.props.onClose(e);
+        };
+
+        // Sets the repo to be used
         this.handleSelectionChange = (e) => {
             this.resetSelection();
             if (e === "release")
@@ -45,82 +126,6 @@ export default class OHBranchSelector extends React.Component {
             "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg unstable main",
                 });
         };
-        this.onDisableModalClose = (e) => {
-            this.props.onDisableModalClose && this.props.onDisableModalClose(e);
-        };
-        this.handleNothing = (e) => {};
-        this.showConsoleOutput = (e) => {
-            this.setState({ showConsoleOutput: !this.state.showConsoleOutput });
-        };
-        this.handleBranchUpdate = (e) => {
-            if (this.state.branchRelease === true) {
-                this.installScript(this.props.openhab, "stable");
-            }
-            if (this.state.branchTesting === true) {
-                this.installScript(this.props.openhab, "testing");
-            }
-            if (this.state.branchSnapshot === true) {
-                this.installScript(this.props.openhab, "unstable");
-            }
-        };
-    }
-
-    installScript(openhab, branch) {
-        this.onDisableModalClose();
-        this.setState({ showLoading: true, showBranchSelector: false });
-        var proc = cockpit.spawn(["./openhab-setup.sh", openhab, branch], {
-            superuser: "require",
-            err: "out",
-            directory: "/opt/openhab-cockpit/src/scripts",
-        });
-        proc.then((data) => {
-            this.setState({
-                consoleMessage: data,
-                changeSuccesfull: !(
-                    data.toLowerCase().includes("error") ||
-          data.toLowerCase().includes("failed")
-                ),
-            });
-            this.openInstallationDone();
-        });
-        proc.catch((exception, data) => {
-            console.error(
-                "Error while installing " +
-          openhab +
-          " from branch (" +
-          branch +
-          ").\nException: " +
-          exception +
-          "\n\nOutput: " +
-          data
-            );
-            this.setState({
-                changeSuccesfull: false,
-                consoleMessage:
-          "Error while installing " +
-          openhab +
-          " from branch (" +
-          branch +
-          ").\nException:" +
-          exception +
-          "\n\nOutput:" +
-          data,
-            });
-            this.openInstallationDone();
-        });
-    }
-
-    openInstallationDone() {
-        this.setState({ showInstallationDone: true, showLoading: false });
-        this.onDisableModalClose();
-    }
-
-    resetSelection() {
-        this.setState({
-            branchRelease: false,
-            branchTesting: false,
-            branchSnapshot: false,
-        });
     }
 
     /* Runs when component is build */
@@ -133,95 +138,22 @@ export default class OHBranchSelector extends React.Component {
     }
 
     render() {
-        const showInstallingSpinner = this.state.showLoading
+        const showMenuDialog = this.state.showMenu
             ? "display-block"
             : "display-none";
-        const installationDone = this.state.showInstallationDone
+
+        const showInstallDialog = !this.state.showMenu
             ? "display-block"
             : "display-none";
-        const showBranchSelectorDialog = this.state.showBranchSelector
-            ? "display-block"
-            : "display-none";
-        const showConsoleOutput = this.state.showConsoleOutput
-            ? "display-block display-flex-center"
-            : "display-none";
-
-        const showConsoleMessageButton = !this.state.changeSuccesfull
-            ? "display-block display-flex-center"
-            : "display-none";
-
-        const displaySuccess = this.state.changeSuccesfull
-            ? "display-block fa-5x success-icon"
-            : "display-none";
-
-        const displayError = this.state.changeSuccesfull
-            ? "display-none"
-            : "display-block fa-5x failure-icon";
 
         return (
-            <div>
-                <div className={showInstallingSpinner}>
-                    <div className="display-flex-center">
-                        <h3 className="display-flex-center-body">
-                            installation running...
-                        </h3>
-                    </div>
-                    <div className="display-flex-center">
-                        <div className="display-flex-center-body">
-                            <span
-                className="pf-c-spinner"
-                role="progressbar"
-                aria-valuetext="Loading..."
-                            >
-                                <span className="pf-c-spinner__clipper" />
-                                <span className="pf-c-spinner__lead-ball" />
-                                <span className="pf-c-spinner__tail-ball" />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="display-flex-center">
-                        <p className="display-flex-center-body">
-                            This installation will need some time, please wait.
-                        </p>
-                    </div>
-                </div>
-                <div className={installationDone}>
-                    <div className="display-flex-center">
-                        <h3 className="display-flex-center-body">Installation done.</h3>
-                    </div>
-                    <div className="div-full-center">
-                        <FontAwesomeIcon className={displaySuccess} icon={faCheckCircle} />
-                        <FontAwesomeIcon
-              className={displayError}
-              icon={faExclamationCircle}
-                        />
-                    </div>
-                    <div className={showConsoleMessageButton}>
-                        <button
-              className="pf-c-button pf-m-primary"
-              onClick={(e) => {
-                  this.showConsoleOutput();
-              }}
-                        >
-                            Show install messages
-                        </button>
-                    </div>
-                    <div className={showConsoleOutput}>
-                        <p className="console-text">{this.state.consoleMessage}</p>
-                    </div>
-                    <br />
-                    <div className="display-flex-center">
-                        <button
-              className="pf-c-button pf-m-primary"
-              onClick={(e) => {
-                  this.showConsoleOutput();
-              }}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-                <div className={showBranchSelectorDialog}>
+            <Modal
+        disableModalClose={this.state.disableModalClose}
+        onClose={this.handleClose}
+        show={this.state.show}
+        header={this.props.openhab + " branches"}
+            >
+                <div className={showMenuDialog}>
                     <RadioBox
             onSelect={this.handleSelectionChange}
             checked={this.state.branchRelease}
@@ -261,14 +193,23 @@ export default class OHBranchSelector extends React.Component {
                         <button
               className="pf-c-button pf-m-primary"
               onClick={(e) => {
-                  this.handleBranchUpdate();
+                  this.updateBranche();
               }}
                         >
                             Update
                         </button>
                     </div>
                 </div>
-            </div>
+                <div className={showInstallDialog}>
+                    <InstallationDialog
+            onClose={this.handleClose}
+            packageName={this.props.openhab + " (" + this.state.brancheToInstall + ")"}
+            showResult={this.state.showResult}
+            message={this.state.consoleMessage}
+            success={this.state.successful}
+                    />
+                </div>
+            </Modal>
         );
     }
 }

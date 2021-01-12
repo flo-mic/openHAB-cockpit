@@ -1,6 +1,7 @@
 import cockpit from "cockpit";
 import React from "react";
 import Dropdown from "../components/dropdown.jsx";
+import Modal from "../components/modal.jsx";
 
 import "../custom.scss";
 import "../patternfly.scss";
@@ -40,14 +41,23 @@ export default class OHServiceDetails extends React.Component {
     constructor() {
         super();
         this.state = {
+            show: true,
             message: "-",
             showDropdown: false,
+            disableModalClose: false,
         };
+        // handler for closing the modal
+        this.handleClose = (e) => {
+            if (!this.state.disableModalClose)
+                this.props.onClose && this.props.onClose(e);
+        };
+        // handles the dropdown selection
         this.handleDropdown = (e) => {
             this.setState({
                 showDropdown: !this.state.showDropdown,
             });
         };
+        // handles send command to control service
         this.handleServiceCommand = (command) => {
             this.setState({
                 showDropdown: false,
@@ -68,7 +78,12 @@ export default class OHServiceDetails extends React.Component {
 
     render() {
         return (
-            <div>
+            <Modal
+        disableModalClose={this.state.disableModalClose}
+        onClose={this.handleClose}
+        show={this.state.show}
+        header={this.props.openhab + " service status"}
+            >
                 <div className="display-flex-justify-space-between">
                     <h4>Status: </h4>
                     <div className="display-flex">
@@ -116,7 +131,7 @@ export default class OHServiceDetails extends React.Component {
                 <div className="padding-top">
                     <p className="console-text">{this.state.message}</p>
                 </div>
-            </div>
+            </Modal>
         );
     }
 }

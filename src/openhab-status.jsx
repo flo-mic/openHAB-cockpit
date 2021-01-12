@@ -1,6 +1,5 @@
 import cockpit from "cockpit";
 import React from "react";
-import Modal from "./components/modal.jsx";
 import OHServiceDetails from "./modules/service_details.jsx";
 import OHBranchSelector from "./modules/openhab_branch_selector.jsx";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
@@ -16,6 +15,7 @@ export default class OHStatus extends React.Component {
         this.get_oh_selected_branch();
     }
 
+    // read data from the openhab cli
     get_oh_cli_details() {
         var proc = cockpit.spawn(["openhab-cli", "info"]);
         proc.stream((data) => {
@@ -24,6 +24,7 @@ export default class OHStatus extends React.Component {
         });
     }
 
+    // read openhab version from oh cli
     get_oh_cli_version(data) {
         data.split("\n").forEach((element) => {
             if (element.includes("Version:")) {
@@ -37,6 +38,7 @@ export default class OHStatus extends React.Component {
         });
     }
 
+    // read openhab urls from oh cli
     get_oh_cli_urls(data) {
         data.split("\n").forEach((element) => {
             if (element.includes("URLs:")) {
@@ -71,6 +73,7 @@ export default class OHStatus extends React.Component {
         });
     }
 
+    // check if oh service is running or dead
     get_oh_service_status() {
         var proc = cockpit.spawn([
             "systemctl",
@@ -85,6 +88,7 @@ export default class OHStatus extends React.Component {
         });
     }
 
+    // read the selected oh branch
     get_oh_selected_branch() {
         cockpit
                 .file("/etc/apt/sources.list.d/openhab.list")
@@ -96,11 +100,18 @@ export default class OHStatus extends React.Component {
                 });
     }
 
+    // checks which oh branch is used input is the apt source list content
     get_oh_branch_from_repo_string(data) {
-        if (data.includes("deb https://dl.bintray.com/openhab/apt-repo2 stable main") && !data.includes(
-            "#deb https://dl.bintray.com/openhab/apt-repo2 stable main"
-        )
-        ) { return "release" }
+        if (
+            data.includes(
+                "deb https://dl.bintray.com/openhab/apt-repo2 stable main"
+            ) &&
+      !data.includes(
+          "#deb https://dl.bintray.com/openhab/apt-repo2 stable main"
+      )
+        ) {
+            return "release";
+        }
         if (
             data.includes(
                 "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg unstable main"
@@ -108,7 +119,9 @@ export default class OHStatus extends React.Component {
       !data.includes(
           "#deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg unstable main"
       )
-        ) { return "snapshot" }
+        ) {
+            return "snapshot";
+        }
         if (
             data.includes(
                 "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg testing main"
@@ -116,10 +129,13 @@ export default class OHStatus extends React.Component {
       !data.includes(
           "#deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg testing main"
       )
-        ) { return "testing" }
+        ) {
+            return "testing";
+        }
         return "-";
     }
 
+    // check if oh2 or oh3 is installed
     getInstalledopenHAB() {
         var proc = cockpit.spawn(["./openhab2-isInstalled.sh"], {
             superuser: "require",
@@ -135,35 +151,20 @@ export default class OHStatus extends React.Component {
                 this.setState({ openhab: "openHAB3" });
                 return;
             }
-            console.error("Detected openhab version \"" + data + "\" is not detected as openHAB2 or openHAB3.");
+            console.error(
+                'Detected openhab version "' +
+          data +
+          '" is not detected as openHAB2 or openHAB3.'
+            );
         });
         proc.catch((exception, data) => {
-            console.error("Error while reading openHAB version 2 or 3 from system. Readed data: \n" + data + "\n\n Exception: \n" + exception);
+            console.error(
+                "Error while reading openHAB version 2 or 3 from system. Readed data: \n" +
+          data +
+          "\n\n Exception: \n" +
+          exception
+            );
         });
-    }
-
-    modal_open_oh_branch_selector(e) {
-        this.setState({
-            headerModal: (
-                <div>
-                    <h4 className="modal-title">{this.state.openhab} Branch</h4>
-                </div>
-            ),
-            bodyModal: <OHBranchSelector onClose={this.handleModalShow} branch={this.state.openhabBranch} onDisableModalClose={this.handleDisableModalClose} openhab={this.state.openhab} />,
-        });
-        this.handleModalShow();
-    }
-
-    modal_open_oh_service_details(e) {
-        this.setState({
-            headerModal: (
-                <div>
-                    <h4 className="modal-title">{this.state.openhab} service</h4>
-                </div>
-            ),
-            bodyModal: <OHServiceDetails openhab={this.state.openhab} />,
-        });
-        this.handleModalShow();
     }
 
     constructor() {
@@ -177,22 +178,50 @@ export default class OHStatus extends React.Component {
             serviceEnabled: "-",
             serviceStatus: "-",
             url: "-",
-            showModal: false,
-            headerModal: <div />,
-            bodyModal: <div />,
-            disableModalClose: false,
+            showBrancheSelector: false,
+            showServiceDetails: false,
+            modalContent: <div />,
         };
-        /* Modal action handler start */
-        this.handleModalShow = (e) => {
-            if (this.state.showModal) this.get_details();
-            this.setState({
-                showModal: !this.state.showModal,
-            });
+        // Opens the branche selector menue
+        this.handleBrancheSelector = (e) => {
+            if (this.state.showBrancheSelector == false) {
+                this.setState({
+                    showBrancheSelector: true,
+                    modalContent: (
+                        <OHBranchSelector
+              onClose={this.handleBrancheSelector}
+              branch={this.state.openhabBranch}
+              openhab={this.state.openhab}
+                        />
+                    ),
+                });
+            } else {
+                this.setState({
+                    showBrancheSelector: false,
+                    modalContent: <div />,
+                });
+                this.get_details();
+            }
         };
-        this.handleDisableModalClose = (e) => {
-            this.setState({
-                disableModalClose: !this.state.disableModalClose,
-            });
+
+        // Opens the service status details
+        this.handleServiceDetails = (e) => {
+            if (this.state.showServiceDetails == false) {
+                this.setState({
+                    showServiceDetails: true,
+                    modalContent: (
+                        <OHServiceDetails
+                  openhab={this.state.openhab}
+                  onClose={this.handleServiceDetails}
+                        />
+                    ),
+                });
+            } else {
+                this.setState({
+                    showServiceDetails: false,
+                    modalContent: <div />,
+                });
+            }
         };
 
     /* Modal action handler end */
@@ -211,15 +240,11 @@ export default class OHStatus extends React.Component {
     render() {
         return (
             <Card className="system-configuration">
-                <CardTitle style={{ paddingLeft: "16px" }}>{this.state.openhab} status</CardTitle>
+                <CardTitle style={{ paddingLeft: "16px" }}>
+                    {this.state.openhab} status
+                </CardTitle>
                 <CardBody>
-                    <Modal
-            disableModalClose={this.state.disableModalClose}
-            onClose={this.handleModalShow}
-            show={this.state.showModal}
-            header={this.state.headerModal}
-            body={this.state.bodyModal}
-                    />
+                    <div>{this.state.modalContent}</div>
                     <table className="pf-c-table pf-m-grid-md pf-m-compact">
                         <tbody>
                             <tr>
@@ -239,7 +264,7 @@ export default class OHStatus extends React.Component {
                                 <td>
                                     <a
                     onClick={(e) => {
-                        this.modal_open_oh_branch_selector();
+                        this.handleBrancheSelector();
                     }}
                                     >
                                         {this.state.openhabBranch}
@@ -251,7 +276,7 @@ export default class OHStatus extends React.Component {
                                 <td>
                                     <a
                     onClick={(e) => {
-                        this.modal_open_oh_service_details();
+                        this.handleServiceDetails();
                     }}
                                     >
                                         {this.state.serviceStatus}
@@ -259,7 +284,9 @@ export default class OHStatus extends React.Component {
                                 </td>
                             </tr>
                             <tr>
-                                <th style={{ paddingRight: "-2rem" }} scope="row">URLs: </th>
+                                <th style={{ paddingRight: "-2rem" }} scope="row">
+                                    URLs:{" "}
+                                </th>
                                 <td>{this.state.url}</td>
                             </tr>
                         </tbody>
