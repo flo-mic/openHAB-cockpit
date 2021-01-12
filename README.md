@@ -46,7 +46,7 @@ sudo chmod +x src/scripts/*.sh && sudo cp -r dist/*
 sudo ln -s /opt/openhab-cockpit/org.cockpit-project.openhab.metainfo.xml /usr/share/metainfo/org.cockpit-project.openhab.metainfo.xml
 ```
 
-You can not access your cockpit under **https://openhabiandevice:9090**
+You can now access your cockpit under **https://openhabiandevice:9090**. For the login use your linux credentials (e.g. openhabian/pi). After the login you see a dashboard of your system. Inside the navigation bar you will find the openHAB-cockpit as "openHAB" module. 
 
 
 # Further reading about the cockpit-project
