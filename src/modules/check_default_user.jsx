@@ -42,13 +42,13 @@ export default class CheckDefaultUser extends React.Component {
                 this.setState({ displayInvalidPasswordMessage: "display-none" });
                 this.cmdChangePassword();
             } else {
-                this.setState({ displayInvalidPasswordMessage: "display-none", invalidPasswordMessage: "The password must contain 8 characters and special characters" });
+                this.setState({ displayInvalidPasswordMessage: "display-block div-full-center", invalidPasswordMessage: "The password must contain 8 characters and special characters" });
             }
         } else {
             if (this.checkPasswordStrength)
                 this.setState({
                     displayInvalidPasswordMessage: "display-block div-full-center",
-                    invalidPasswordMessage: "The password can not be empty.",
+                    invalidPasswordMessage: "Passwords empty or do not match.",
                 });
         }
     }
@@ -120,7 +120,7 @@ export default class CheckDefaultUser extends React.Component {
             showSuccessMessage: false,
             changeSuccesfull: true,
             resultMessage: "",
-            invalidPasswordMessage: "The password can not be empty."
+            invalidPasswordMessage: "Passwords empty or do not match."
         };
         this.handleModalShow = (e) => {
             if (this.state.showModal == true) {

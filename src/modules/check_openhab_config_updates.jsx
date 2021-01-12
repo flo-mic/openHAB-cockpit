@@ -95,7 +95,7 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
             showSuccessIcon: true,
             showUpdateButton: true,
             showModal: false,
-            resultMessage: "Update done. In order to see the latest updates please reload this page with \"Strg\" + \"F5\".",
+            resultMessage: "Update done. Please reload the page to see them.",
         };
         this.handleModalShow = (e) => {
             if (this.state.showModal == true) {
