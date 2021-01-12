@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../custom.scss";
 import "../components/modal.scss";
-import "../components/patternfly.scss";
+import "../patternfly.scss";
 
 export default class OHBranchSelector extends React.Component {
     constructor() {

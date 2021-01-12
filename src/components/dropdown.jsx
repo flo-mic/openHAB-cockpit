@@ -1,6 +1,6 @@
 import React from "react";
 import "../custom.scss";
-import "./patternfly.scss";
+import "../patternfly.scss";
 
 export default class Dropdown extends React.Component {
     constructor() {

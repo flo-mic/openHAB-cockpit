@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../custom.scss";
 import "../components/modal.scss";
-import "../components/patternfly.scss";
+import "../patternfly.scss";
 
 export default class CheckOpenHABCockpitUpdates extends React.Component {
     // checking for updates on github

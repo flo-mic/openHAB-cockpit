@@ -7,7 +7,7 @@ import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../custom.scss";
-import "../components/patternfly.scss";
+import "../patternfly.scss";
 
 export default class LogViewer extends React.Component {
     /* Watch the openhab event log for new changes */

@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./modal.scss";
 import "../custom.scss";
-import "./patternfly.scss";
+import "../patternfly.scss";
 
 export default class Modal extends React.Component {
     constructor() {

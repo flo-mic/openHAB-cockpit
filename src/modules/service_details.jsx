@@ -3,7 +3,7 @@ import React from "react";
 import Dropdown from "../components/dropdown.jsx";
 
 import "../custom.scss";
-import "../components/patternfly.scss";
+import "../patternfly.scss";
 
 export default class OHServiceDetails extends React.Component {
     refreshService() {

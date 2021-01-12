@@ -1,6 +1,7 @@
 import cockpit from "cockpit";
 import React from "react";
 import ReactDOM from "react-dom";
+import RadioBox from "../components/radio-box.jsx";
 import {
     faCheckCircle,
     faExclamationCircle,
@@ -9,7 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../custom.scss";
 import "../components/modal.scss";
-import "../components/patternfly.scss";
+import "../patternfly.scss";
 
 export default class OpenHABianApplyImprovements extends React.Component {
     installPackage() {
@@ -216,150 +217,72 @@ export default class OpenHABianApplyImprovements extends React.Component {
                             </div>
                             <div className="modal-body scroll">
                                 <div className={showChoiceMenu}>
-                                    <div className="padding-vertical">
-                                        <div className="pf-c-radio">
-                                            <input
-                        className="pf-c-radio__input margin-top"
-                        type="radio"
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageSystemPackages");
-                        }}
-                        onChange={(e) => {
-                            this.handleNothing();
-                        }}
-                        checked={this.state.packageSystemPackages}
-                                            />
-                                            <label
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageSystemPackages");
-                        }}
-                        className="pf-c-radio__label radio-item"
-                                            >
-                                                <b>System packages</b> - Install needed and recomended
-                                                system packages on your system.
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="padding-vertical">
-                                        <div className="pf-c-radio">
-                                            <input
-                        className="pf-c-radio__input margin-top"
-                        type="radio"
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageBashVim");
-                        }}
-                        onChange={(e) => {
-                            this.handleNothing();
-                        }}
-                        checked={this.state.packageBashVim}
-                                            />
-                                            <label
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageBashVim");
-                        }}
-                        className="pf-c-radio__label radio-item"
-                                            >
-                                                <b>Bash & VIM</b> - Updates customized openHABian
-                                                settings for bash, vim and nano.
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="padding-vertical">
-                                        <div className="pf-c-radio">
-                                            <input
-                        className="pf-c-radio__input margin-top"
-                        type="radio"
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageSystemTweaks");
-                        }}
-                        onChange={(e) => {
-                            this.handleNothing();
-                        }}
-                        checked={this.state.packageSystemTweaks}
-                                            />
-                                            <label
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageSystemTweaks");
-                        }}
-                        className="pf-c-radio__label radio-item"
-                                            >
-                                                <b>System Tweaks</b> - Adds /srv mounts and updates
-                                                settings that are typicaly for openHAB.
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="padding-vertical">
-                                        <div className="pf-c-radio">
-                                            <input
-                        className="pf-c-radio__input margin-top"
-                        type="radio"
-                        onClick={(e) => {
-                            this.handleSelectionChange("packagePermissions");
-                        }}
-                        onChange={(e) => {
-                            this.handleNothing();
-                        }}
-                        checked={this.state.packagePermissions}
-                                            />
-                                            <label
-                        onClick={(e) => {
-                            this.handleSelectionChange("packagePermissions");
-                        }}
-                        className="pf-c-radio__label radio-item"
-                                            >
-                                                <b>Fix Permissions</b> - Update file permissions of
-                                                commonly used files and folders.
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="padding-vertical">
-                                        <div className="pf-c-radio">
-                                            <input
-                        className="pf-c-radio__input margin-top"
-                        type="radio"
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageFireMotD");
-                        }}
-                        onChange={(e) => {
-                            this.handleNothing();
-                        }}
-                        checked={this.state.packageFireMotD}
-                                            />
-                                            <label
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageFireMotD");
-                        }}
-                        className="pf-c-radio__label radio-item"
-                                            >
-                                                <b>FireMotD</b> - Upgrade the program behind the system
-                                                overview on SSH login.
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="padding-vertical">
-                                        <div className="pf-c-radio">
-                                            <input
-                        className="pf-c-radio__input margin-top"
-                        type="radio"
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageSamba");
-                        }}
-                        onChange={(e) => {
-                            this.handleNothing();
-                        }}
-                        checked={this.state.packageSamba}
-                                            />
-                                            <label
-                        onClick={(e) => {
-                            this.handleSelectionChange("packageSamba");
-                        }}
-                        className="pf-c-radio__label radio-item"
-                                            >
-                                                <b>Samba shares</b> - Install the Samba file sharing
-                                                service and set up openHAB shares.
-                                            </label>
-                                        </div>
-                                    </div>
+                                    <RadioBox
+                    onSelect={this.handleSelectionChange}
+                    checked={this.state.packageSystemPackages}
+                    value="packageSystemPackages"
+                    content={
+                        <div>
+                            <b>System packages</b> - Install needed and recomended
+                            system packages on your system."
+                        </div>
+                    }
+                                    />
+                                    <RadioBox
+                    onSelect={this.handleSelectionChange}
+                    checked={this.state.packageBashVim}
+                    value="packageBashVim"
+                    content={
+                        <div>
+                            <b>Bash & VIM</b> - Updates customized openHABian
+                            settings for bash, vim and nano."
+                        </div>
+                    }
+                                    />
+                                    <RadioBox
+                    onSelect={this.handleSelectionChange}
+                    checked={this.state.packageSystemTweaks}
+                    value="packageSystemTweaks"
+                    content={
+                        <div>
+                            <b>System Tweaks</b> - Adds /srv mounts and updates
+                            settings that are typicaly for openHAB.
+                        </div>
+                    }
+                                    />
+                                    <RadioBox
+                    onSelect={this.handleSelectionChange}
+                    checked={this.state.packagePermissions}
+                    value="packagePermissions"
+                    content={
+                        <div>
+                            <b>Fix Permissions</b> - Update file permissions of
+                            commonly used files and folders.
+                        </div>
+                    }
+                                    />
+                                    <RadioBox
+                    onSelect={this.handleSelectionChange}
+                    checked={this.state.packageFireMotD}
+                    value="packageFireMotD"
+                    content={
+                        <div>
+                            <b>FireMotD</b> - Upgrade the program behind the system
+                            overview on SSH login.
+                        </div>
+                    }
+                                    />
+                                    <RadioBox
+                    onSelect={this.handleSelectionChange}
+                    checked={this.state.packageSamba}
+                    value="packageSamba"
+                    content={
+                        <div>
+                            <b>Samba shares</b> - Install the Samba file sharing
+                            service and set up openHAB shares.
+                        </div>
+                    }
+                                    />
                                     <div
                     style={{ paddingTop: "0.5rem" }}
                     className="div-full-center"

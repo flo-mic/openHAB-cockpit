@@ -6,7 +6,7 @@ import OHBranchSelector from "./modules/openhab_branch_selector.jsx";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
 
 import "./custom.scss";
-import "./components/patternfly.scss";
+import "./patternfly.scss";
 
 export class OHStatus extends React.Component {
     get_details() {

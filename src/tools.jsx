@@ -4,7 +4,7 @@ import OpenHABianApplyImprovements from "./modules/openhabian_apply_improvements
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
 
 import "./custom.scss";
-import "./components/patternfly.scss";
+import "./patternfly.scss";
 
 export default class Tools extends React.Component {
     constructor() {
