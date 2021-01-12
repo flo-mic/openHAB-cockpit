@@ -38,7 +38,7 @@ export default class OpenHABianApplyImprovements extends React.Component {
                     resultMessage:
             "Installation of package " +
             this.state.PackageDisplayName +
-            " done. Logs are stored in the browser console if you need them.",
+            " done.",
                 });
             });
             proc.catch((exception, data) => {
@@ -97,6 +97,8 @@ export default class OpenHABianApplyImprovements extends React.Component {
             packageSamba: false,
             selectedPackage: "packageSystemPackages",
             PackageDisplayName: "System Packages",
+            showConsoleOutput: false,
+            consoleMessage: "",
         };
 
         this.handleSelectionChange = (e) => {
@@ -138,7 +140,10 @@ export default class OpenHABianApplyImprovements extends React.Component {
                     PackageDisplayName: "Samba share",
                 });
         };
-
+        // shows result messages
+        this.showConsoleOutput = (e) => {
+            this.setState({ showConsoleOutput: !this.state.showConsoleOutput });
+        };
         // handler for closing the modal
         this.onClose = (e) => {
             if (!this.state.installingPackage)
@@ -174,6 +179,10 @@ export default class OpenHABianApplyImprovements extends React.Component {
             ? "display-block"
             : "display-none";
 
+        const showCloseButton = !this.state.installingPackage
+            ? "display-block"
+            : "display-none";
+
         const showChoiceMenu = this.state.showChoiceMenu
             ? "display-block"
             : "display-none";
@@ -185,6 +194,10 @@ export default class OpenHABianApplyImprovements extends React.Component {
         const displayError = this.state.showSuccessIcon
             ? "display-none"
             : "display-block fa-5x failure-icon";
+
+        const showConsoleOutput = this.state.showConsoleOutput
+            ? "display-block display-flex-center"
+            : "display-none";
 
         return (
             <div>
@@ -203,15 +216,17 @@ export default class OpenHABianApplyImprovements extends React.Component {
                                         <h4 className="modal-title">Apply Improvements</h4>
                                     </div>
                                     <div>
-                                        <button
-                      className="pf-c-button close-button"
-                      type="button"
-                      onClick={(e) => {
-                          this.onClose(e);
-                      }}
-                                        >
-                                            X
-                                        </button>
+                                        <div className={showCloseButton}>
+                                            <button
+                        className="pf-c-button close-button"
+                        type="button"
+                        onClick={(e) => {
+                            this.onClose(e);
+                        }}
+                                            >
+                                                X
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -283,12 +298,9 @@ export default class OpenHABianApplyImprovements extends React.Component {
                         </div>
                     }
                                     />
-                                    <div
-                    style={{ paddingTop: "0.5rem" }}
-                    className="div-full-center"
-                                    >
+                                    <br />
+                                    <div className="div-full-center">
                                         <button
-                      style={{ paddingTop: "0.5rem" }}
                       className="pf-c-button pf-m-primary"
                       onClick={(e) => {
                           this.installPackage();
@@ -340,18 +352,21 @@ export default class OpenHABianApplyImprovements extends React.Component {
                                     >
                                         <p>{this.state.resultMessage}</p>
                                     </div>
-                                    <div
-                    style={{ paddingTop: "0.5rem" }}
-                    className="div-full-center"
-                                    >
-                                        <button
-                      className="pf-c-button pf-m-primary"
-                      onClick={(e) => {
-                          this.backToMenuSelection();
-                      }}
-                                        >
-                                            Back
-                                        </button>
+                                    <br />
+                                    <div className="display-flex-center">
+                                        <div className="display-flex-center-body">
+                                            <button
+                        className="pf-c-button pf-m-primary"
+                        onClick={(e) => {
+                            this.showConsoleOutput();
+                        }}
+                                            >
+                                                Show install messages
+                                            </button>
+                                        </div>
+                                        <div className={showConsoleOutput}>
+                                            <p className="console-text">{this.state.consoleMessage}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

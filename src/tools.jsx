@@ -40,7 +40,7 @@ export default class Tools extends React.Component {
 
     render() {
         return (
-            <Card style={{ paddingLeft: "16px" }} className="system-configuration">
+            <Card className="system-configuration">
                 <CardTitle>Tools</CardTitle>
                 <CardBody>
                     <div>{this.state.LogViewerContent}</div>

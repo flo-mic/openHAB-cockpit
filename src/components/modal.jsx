@@ -52,9 +52,6 @@ export default class Modal extends React.Component {
     }
 
     render() {
-        const classesModalFooter = this.props.showCloseButton
-            ? "display-block modal-footer"
-            : "display-none";
         const showHideBackground = this.props.show
             ? "modal-backdrop in"
             : "display-none";
@@ -97,22 +94,6 @@ export default class Modal extends React.Component {
                                 </div>
                             </div>
                             <div className="modal-body scroll">{this.props.body}</div>
-                            <div className={classesModalFooter}>
-                                {this.props.footer}
-                                <div>
-                                    <div className={hideCloseButtons}>
-                                        <button
-                      className="pf-c-button pf-m-secondary"
-                      type="button"
-                      onClick={(e) => {
-                          this.onClose(e);
-                      }}
-                                        >
-                                            Close
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

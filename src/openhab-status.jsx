@@ -149,7 +149,7 @@ export default class OHStatus extends React.Component {
                     <h4 className="modal-title">{this.state.openhab} Branch</h4>
                 </div>
             ),
-            bodyModal: <OHBranchSelector branch={this.state.openhabBranch} onDisableModalClose={this.handleDisableModalClose} openhab={this.state.openhab} />,
+            bodyModal: <OHBranchSelector onClose={this.handleModalShow} branch={this.state.openhabBranch} onDisableModalClose={this.handleDisableModalClose} openhab={this.state.openhab} />,
         });
         this.handleModalShow();
     }
@@ -259,7 +259,7 @@ export default class OHStatus extends React.Component {
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row">URLs: </th>
+                                <th style={{ paddingRight: "-2rem" }} scope="row">URLs: </th>
                                 <td>{this.state.url}</td>
                             </tr>
                         </tbody>

@@ -22,7 +22,7 @@ export default class OHBranchSelector extends React.Component {
             showLoading: false,
             showBranchSelector: true,
             showInstallationDone: false,
-            message: "",
+            consoleMessage: "",
             changeSuccesfull: true,
         };
         this.handleSelectionChange = (e) => {
@@ -49,8 +49,8 @@ export default class OHBranchSelector extends React.Component {
             this.props.onDisableModalClose && this.props.onDisableModalClose(e);
         };
         this.handleNothing = (e) => {};
-        this.showOutput = (e) => {
-            this.setState({ showOutput: !this.state.showOutput });
+        this.showConsoleOutput = (e) => {
+            this.setState({ showConsoleOutput: !this.state.showConsoleOutput });
         };
         this.handleBranchUpdate = (e) => {
             if (this.state.branchRelease === true) {
@@ -75,7 +75,7 @@ export default class OHBranchSelector extends React.Component {
         });
         proc.then((data) => {
             this.setState({
-                message: data,
+                consoleMessage: data,
                 changeSuccesfull: !(
                     data.toLowerCase().includes("error") ||
           data.toLowerCase().includes("failed")
@@ -96,7 +96,7 @@ export default class OHBranchSelector extends React.Component {
             );
             this.setState({
                 changeSuccesfull: false,
-                message:
+                consoleMessage:
           "Error while installing " +
           openhab +
           " from branch (" +
@@ -142,8 +142,12 @@ export default class OHBranchSelector extends React.Component {
         const showBranchSelectorDialog = this.state.showBranchSelector
             ? "display-block"
             : "display-none";
-        const showOutput = this.state.showOutput
-            ? " display-block console-text"
+        const showConsoleOutput = this.state.showConsoleOutput
+            ? "display-block display-flex-center"
+            : "display-none";
+
+        const showConsoleMessageButton = !this.state.changeSuccesfull
+            ? "display-block display-flex-center"
             : "display-none";
 
         const displaySuccess = this.state.changeSuccesfull
@@ -183,7 +187,7 @@ export default class OHBranchSelector extends React.Component {
                 </div>
                 <div className={installationDone}>
                     <div className="display-flex-center">
-                        <h3 className="display-flex-center-body">installation done.</h3>
+                        <h3 className="display-flex-center-body">Installation done.</h3>
                     </div>
                     <div className="div-full-center">
                         <FontAwesomeIcon className={displaySuccess} icon={faCheckCircle} />
@@ -192,22 +196,29 @@ export default class OHBranchSelector extends React.Component {
               icon={faExclamationCircle}
                         />
                     </div>
-                    <div className="display-flex-center">
-                        <div className="display-flex-center-body">
-                            <button
-                className="pf-c-button pf-m-primary"
-                onClick={(e) => {
-                    this.showOutput();
-                }}
-                            >
-                                Show install messages
-                            </button>
-                        </div>
+                    <div className={showConsoleMessageButton}>
+                        <button
+              className="pf-c-button pf-m-primary"
+              onClick={(e) => {
+                  this.showConsoleOutput();
+              }}
+                        >
+                            Show install messages
+                        </button>
                     </div>
+                    <div className={showConsoleOutput}>
+                        <p className="console-text">{this.state.consoleMessage}</p>
+                    </div>
+                    <br />
                     <div className="display-flex-center">
-                        <div className="display-flex-center-body">
-                            <p className={showOutput}>{this.state.message}</p>
-                        </div>
+                        <button
+              className="pf-c-button pf-m-primary"
+              onClick={(e) => {
+                  this.showConsoleOutput();
+              }}
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
                 <div className={showBranchSelectorDialog}>

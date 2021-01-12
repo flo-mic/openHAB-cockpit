@@ -277,8 +277,8 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                                     >
                                         <p>{this.state.resultMessage}</p>
                                     </div>
+                                    <br />
                                     <div
-                    style={{ paddingTop: "0.5rem" }}
                     className="div-full-center"
                                     >
                                         <button
