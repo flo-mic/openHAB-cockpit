@@ -6,7 +6,7 @@ import "../patternfly.scss";
 export default class Modal extends React.Component {
     constructor() {
         super();
-        this.state = { node: React.createRef() };
+        this.state = { prevStateShow: "", node: React.createRef() };
         // Calls the close methode passed to the ecomponent
         this.onClose = (e) => {
             if (!this.props.disableModalClose)
@@ -24,6 +24,7 @@ export default class Modal extends React.Component {
     }
 
     set_event_Handler() {
+        if (this.props.show === this.state.prevStateShow) return;
         if (this.props.show) {
             document.addEventListener("click", this.handleClickOutsideModal, false);
             document.addEventListener("keydown", this.handleModalEscKeyEvent, false);
@@ -44,6 +45,10 @@ export default class Modal extends React.Component {
     }
 
     componentDidMount() {
+        this.set_event_Handler();
+    }
+
+    componentDidUpdate() {
         this.set_event_Handler();
     }
 

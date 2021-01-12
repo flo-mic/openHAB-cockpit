@@ -13,6 +13,7 @@ export default class OHStatus extends React.Component {
         this.get_oh_service_status();
         this.get_oh_cli_details();
         this.get_oh_selected_branch();
+        this.getConsoleDetails();
     }
 
     // read data from the openhab cli
@@ -167,6 +168,39 @@ export default class OHStatus extends React.Component {
         });
     }
 
+    // get the ssh host
+    getConsoleDetails() {
+        cockpit.file("/var/lib/" + this.state.openhab.toLowerCase().replace("3", "") + "/etc/org.apache.karaf.shell.cfg", {
+            superuser: "require",
+            err: "out",
+        }).read()
+                .then(data => {
+                    console.log("1");
+
+                    if (data.includes("sshHost") && data.includes("sshPort")) {
+                        console.log("2");
+
+                        this.setState({
+                            consoleIP: data.split("sshHost")[1].split("\n")[0].replace("=", "").trim(),
+                            consolePort: data.split("sshPort")[1].split("\n")[0].replace("=", "").trim(),
+                        }, () => {
+                            console.log("3");
+                            this.setState({ consoleStatus: (this.state.consoleIP === "127.0.0.1") ? "local" : "remote" });
+                        });
+                    } else {
+                        console.log("4");
+
+                        console.error("Can not read the console ip and port from file '" + "/var/lib/" + this.state.openhab.toLowerCase().replace("3", "") + "/etc/org.apache.karaf.shell.cfg'. Output:\n" + data);
+                    }
+                })
+                .catch((exception, data) => {
+                    console.log("5");
+
+                    console.error("Could not read karaf console settings from file '" + "/var/lib/" + this.state.openhab.toLowerCase().replace("3", "") + "/etc/org.apache.karaf.shell.cfg'. Output: \n" + data + "\n\n Exception: \n" + exception);
+                });
+        console.log("6");
+    }
+
     constructor() {
         super();
         this.state = {
@@ -177,6 +211,9 @@ export default class OHStatus extends React.Component {
         "https://github.com/openhab/openhab-distro/releases/",
             serviceEnabled: "-",
             serviceStatus: "-",
+            consoleStatus: "-",
+            consoleIP: "-",
+            consolePort: "-",
             url: "-",
             showBrancheSelector: false,
             showServiceDetails: false,
@@ -211,8 +248,8 @@ export default class OHStatus extends React.Component {
                     showServiceDetails: true,
                     modalContent: (
                         <OHServiceDetails
-                  openhab={this.state.openhab}
-                  onClose={this.handleServiceDetails}
+              openhab={this.state.openhab}
+              onClose={this.handleServiceDetails}
                         />
                     ),
                 });
@@ -280,6 +317,18 @@ export default class OHStatus extends React.Component {
                     }}
                                     >
                                         {this.state.serviceStatus}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Console: </th>
+                                <td>
+                                    <a
+                    onClick={(e) => {
+                        this.handleServiceDetails();
+                    }}
+                                    >
+                                        {this.state.consoleStatus}
                                     </a>
                                 </td>
                             </tr>
