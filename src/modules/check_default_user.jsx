@@ -54,23 +54,13 @@ export default class CheckDefaultUser extends React.Component {
     }
 
     checkPasswordStrength(password) {
-        var strength = 0;
-        if (password.length < 8) {
-            strength += 1;
-        }
-        if (password.match(/[a-z]+/)) {
-            strength += 1;
-        }
-        if (password.match(/[A-Z]+/)) {
-            strength += 1;
-        }
-        if (password.match(/[0-9]+/)) {
-            strength += 1;
-        }
-        if (password.match(/[$@#&!]+/)) {
-            strength += 1;
-        }
-        if (strength == 5) {
+        if (/.{8,}/.test(password) * (/* at least 8 characters */
+            /.{12,}/.test(password) + /* bonus if longer */
+            /[a-z]/.test(password) + /* a lower letter */
+            /[A-Z]/.test(password) + /* a upper letter */
+            /\d/.test(password) + /* a digit */
+            /[^A-Za-z0-9]/.test(password) /* a special character */
+        ) >= 4) {
             return true;
         }
         return false;
@@ -131,19 +121,19 @@ export default class CheckDefaultUser extends React.Component {
                 );
                 document.removeEventListener(
                     "keydown",
-                    this.handleModalEscKeyEvent,
+                    this.handleKeyEvent,
                     false
                 );
             } else {
                 document.addEventListener("click", this.handleClickOutsideModal, false);
                 document.addEventListener(
                     "keydown",
-                    this.handleModalEscKeyEvent,
+                    this.handleKeyEvent,
                     false
                 );
             }
             this.setState({
-                showModal: !this.state.showModal,
+                showModal: !this.state.showModal, showSuccessMessage: false, newPassword: "", confirmNewPassword: "",
             });
         };
         this.handleNewPasswordText = (e) => {
@@ -160,8 +150,9 @@ export default class CheckDefaultUser extends React.Component {
             const domNode = ReactDOM.findDOMNode(this.state.node);
             if (!domNode.contains(e.target)) this.handleModalShow(e);
         };
-        this.handleModalEscKeyEvent = (e) => {
+        this.handleKeyEvent = (e) => {
             if (e.keyCode == 27) this.handleModalShow(e);
+            if (e.keyCode == 13) this.setPassword(); // detect enter
         };
     }
 
@@ -171,7 +162,7 @@ export default class CheckDefaultUser extends React.Component {
 
     componentWillUnmount() {
         document.removeEventListener("click", this.handleClickOutsideModal, false);
-        document.removeEventListener("keydown", this.handleModalEscKeyEvent, false);
+        document.removeEventListener("keydown", this.handleKeyEvent, false);
     }
 
     render() {
