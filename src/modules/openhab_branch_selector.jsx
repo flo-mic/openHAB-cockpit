@@ -1,6 +1,10 @@
 import React from "react";
 import cockpit from "cockpit";
-import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import RadioBox from "../components/radio-box.jsx";
+import {
+    faCheckCircle,
+    faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../custom.scss";
@@ -70,12 +74,38 @@ export default class OHBranchSelector extends React.Component {
             directory: "/opt/openhab-cockpit/src/scripts",
         });
         proc.then((data) => {
-            this.setState({ message: data, changeSuccesfull: !(data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) });
+            this.setState({
+                message: data,
+                changeSuccesfull: !(
+                    data.toLowerCase().includes("error") ||
+          data.toLowerCase().includes("failed")
+                ),
+            });
             this.openInstallationDone();
         });
         proc.catch((exception, data) => {
-            console.error("Error while installing " + openhab + " from branch (" + branch + ").\nException: " + exception + "\n\nOutput: " + data);
-            this.setState({ changeSuccesfull: false, message: "Error while installing " + openhab + " from branch (" + branch + ").\nException:" + exception + "\n\nOutput:" + data });
+            console.error(
+                "Error while installing " +
+          openhab +
+          " from branch (" +
+          branch +
+          ").\nException: " +
+          exception +
+          "\n\nOutput: " +
+          data
+            );
+            this.setState({
+                changeSuccesfull: false,
+                message:
+          "Error while installing " +
+          openhab +
+          " from branch (" +
+          branch +
+          ").\nException:" +
+          exception +
+          "\n\nOutput:" +
+          data,
+            });
             this.openInstallationDone();
         });
     }
@@ -98,7 +128,8 @@ export default class OHBranchSelector extends React.Component {
         this.resetSelection();
         if (this.props.branch === "release") this.setState({ branchRelease: true });
         if (this.props.branch === "testing") this.setState({ branchTesting: true });
-        if (this.props.branch === "snapshot") this.setState({ branchSnapshot: true });
+        if (this.props.branch === "snapshot")
+            this.setState({ branchSnapshot: true });
     }
 
     render() {
@@ -152,18 +183,13 @@ export default class OHBranchSelector extends React.Component {
                 </div>
                 <div className={installationDone}>
                     <div className="display-flex-center">
-                        <h3 className="display-flex-center-body">
-                            installation done.
-                        </h3>
+                        <h3 className="display-flex-center-body">installation done.</h3>
                     </div>
                     <div className="div-full-center">
+                        <FontAwesomeIcon className={displaySuccess} icon={faCheckCircle} />
                         <FontAwesomeIcon
-                      className={displaySuccess}
-                      icon={faCheckCircle}
-                        />
-                        <FontAwesomeIcon
-                      className={displayError}
-                      icon={faExclamationCircle}
+              className={displayError}
+              icon={faExclamationCircle}
                         />
                     </div>
                     <div className="display-flex-center">
@@ -176,98 +202,56 @@ export default class OHBranchSelector extends React.Component {
                             >
                                 Show install messages
                             </button>
-
                         </div>
                     </div>
                     <div className="display-flex-center">
-                        <div className="display-flex-center-body"><p className={showOutput}>{this.state.message}</p>
+                        <div className="display-flex-center-body">
+                            <p className={showOutput}>{this.state.message}</p>
                         </div>
                     </div>
                 </div>
                 <div className={showBranchSelectorDialog}>
-                    <div className="padding-vertical">
-                        <div className="pf-c-radio">
-                            <input
-              className="pf-c-radio__input margin-top"
-              type="radio"
-              onClick={(e) => {
-                  this.handleSelectionChange("release");
-              }}
-              onChange={(e) => {
-                  this.handleNothing();
-              }}
-              checked={this.state.branchRelease}
-                            />
-                            <label
-              onClick={(e) => {
-                  this.handleSelectionChange("release");
-              }}
-              className="pf-c-radio__label radio-item"
-              htmlFor="radio-simple"
-                            >
-                                <b>release</b> - Install or switch to the latest openHAB release.
-                                Use thisfor your productive environment.
-                            </label>
-                        </div>
-                    </div>
-                    <div className="padding-vertical">
-                        <div className="pf-c-radio">
-                            <input
-              className="pf-c-radio__input"
-              type="radio"
-              onClick={(e) => {
-                  this.handleSelectionChange("testing");
-              }}
-              onChange={(e) => {
-                  this.handleNothing();
-              }}
-              checked={this.state.branchTesting}
-                            />
-                            <label
-              onClick={(e) => {
-                  this.handleSelectionChange("testing");
-              }}
-              className="pf-c-radio__label radio-item"
-              htmlFor="radio-simple"
-                            >
-                                <b>testing</b> - Install or switch to the latest openHAB testing
-                                build. This is only recomended for testing.
-                            </label>
-                        </div>
-                    </div>
-                    <div className="padding-vertical">
-                        <div className="pf-c-radio">
-                            <input
-              className="pf-c-radio__input"
-              type="radio"
-              onClick={(e) => {
-                  this.handleSelectionChange("snapshot");
-              }}
-              onChange={(e) => {
-                  this.handleNothing();
-              }}
-              checked={this.state.branchSnapshot}
-                            />
-                            <label
-              onClick={(e) => {
-                  this.handleSelectionChange("snapshot");
-              }}
-              className="pf-c-radio__label radio-item"
-              htmlFor="radio-simple"
-                            >
-                                <b>snapshot</b> - Install or switch to the latest openHAB
-                                snapshot. Snapshots contain the latest changes and therefore they
-                                are not stable. Use them only for testing!
-                            </label>
-                        </div>
-                    </div>
+                    <RadioBox
+            onSelect={this.handleSelectionChange}
+            checked={this.state.branchRelease}
+            value="release"
+            content={
+                <div>
+                    <b>release</b> - Install or switch to the latest openHAB
+                    release. Use thisfor your productive environment.
+                </div>
+            }
+                    />
+                    <RadioBox
+            onSelect={this.handleSelectionChange}
+            checked={this.state.branchTesting}
+            value="testing"
+            content={
+                <div>
+                    <b>testing</b> - Install or switch to the latest openHAB testing
+                    build. This is only recomended for testing.
+                </div>
+            }
+                    />
+                    <RadioBox
+            onSelect={this.handleSelectionChange}
+            checked={this.state.branchSnapshot}
+            value="snapshot"
+            content={
+                <div>
+                    <b>snapshot</b> - Install or switch to the latest openHAB
+                    snapshot. Snapshots contain the latest changes and therefore
+                    they are not stable. Use them only for testing!
+                </div>
+            }
+                    />
                     <br />
                     <div className="div-full-center">
                         <button
-                className="pf-c-button pf-m-primary"
-                onClick={(e) => {
-                    this.handleBranchUpdate();
-                }}
+              className="pf-c-button pf-m-primary"
+              onClick={(e) => {
+                  this.handleBranchUpdate();
+              }}
                         >
                             Update
                         </button>
