@@ -28,7 +28,7 @@ export default class CheckDefaultUser extends React.Component {
         });
         proc.catch((exception, data) => {
             console.error(
-                "Error while verifying the default openhabian/pi password. Output: \n" +
+                "Error while verifying the system default password for openhabian/pi. Output: \n" +
           data +
           "\n\n Exception: \n" +
           exception
@@ -37,17 +37,43 @@ export default class CheckDefaultUser extends React.Component {
     }
 
     setPassword() {
-        if (
-            this.state.newPassword !== "" &&
-      this.state.newPassword === this.state.confirmNewPassword
-        ) {
-            this.setState({ displayInvalidPasswordMessage: "display-none" });
-            this.cmdChangePassword();
+        if (this.state.newPassword !== "" && this.state.newPassword === this.state.confirmNewPassword) {
+            if (this.checkPasswordStrength(this.state.newPassword) == true) {
+                this.setState({ displayInvalidPasswordMessage: "display-none" });
+                this.cmdChangePassword();
+            } else {
+                this.setState({ displayInvalidPasswordMessage: "display-none", invalidPasswordMessage: "The password must contain 8 characters and special characters" });
+            }
         } else {
-            this.setState({
-                displayInvalidPasswordMessage: "display-block div-full-center",
-            });
+            if (this.checkPasswordStrength)
+                this.setState({
+                    displayInvalidPasswordMessage: "display-block div-full-center",
+                    invalidPasswordMessage: "The password can not be empty.",
+                });
         }
+    }
+
+    checkPasswordStrength(password) {
+        var strength = 0;
+        if (password.length < 8) {
+            strength += 1;
+        }
+        if (password.match(/[a-z]+/)) {
+            strength += 1;
+        }
+        if (password.match(/[A-Z]+/)) {
+            strength += 1;
+        }
+        if (password.match(/[0-9]+/)) {
+            strength += 1;
+        }
+        if (password.match(/[$@#&!]+/)) {
+            strength += 1;
+        }
+        if (strength == 5) {
+            return true;
+        }
+        return false;
     }
 
     cmdChangePassword() {
@@ -94,6 +120,7 @@ export default class CheckDefaultUser extends React.Component {
             showSuccessMessage: false,
             changeSuccesfull: true,
             resultMessage: "",
+            invalidPasswordMessage: "The password can not be empty."
         };
         this.handleModalShow = (e) => {
             if (this.state.showModal == true) {
@@ -185,7 +212,7 @@ export default class CheckDefaultUser extends React.Component {
             title="Default password not changed!"
                     >
                         <p>
-                            Running your raspberry pi with the default password of{" "}
+                            Running your system with the default password of{" "}
                             {this.state.defaultUser} is a security risk and should not be
                             done.{" "}
                             <a
@@ -255,7 +282,7 @@ export default class CheckDefaultUser extends React.Component {
                                     </div>
                                     <div className={this.state.displayInvalidPasswordMessage}>
                                         <label style={{ padding: "0.5rem", color: "red" }}>
-                                            Passwords empty or did not match!
+                                            {this.state.invalidPasswordMessage}
                                         </label>
                                     </div>
                                     <div
