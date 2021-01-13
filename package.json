@@ -52,9 +52,10 @@
     "@fortawesome/react-fontawesome": "^0.1.14",
     "@patternfly/patternfly": "4.70.2",
     "@patternfly/react-core": "4.84.4",
-    "core-js": "3.8.2",
+    "core-js": "^3.8.2",
     "react": "16.14.0",
     "react-dom": "16.14.0",
-    "react-scroll-to-bottom": "^4.1.0"
+    "react-scroll-to-bottom": "^4.1.0",
+    "regenerator-runtime": "^0.13.7"
   }
 }

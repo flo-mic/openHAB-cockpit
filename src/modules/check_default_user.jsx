@@ -1,42 +1,26 @@
 import React from "react";
-import cockpit from "cockpit";
 import Modal from "../components/modal.jsx";
 import { Alert, TextInput } from "@patternfly/react-core";
-import {
-    faCheckCircle,
-    faExclamationCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { sendCommand } from "../functions/cockpit.js";
+import ConfigurationDialog from "../components/configuration-dialog.jsx";
 
 import "../custom.scss";
 import "../patternfly.scss";
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 export default class CheckDefaultUser extends React.Component {
     // check if the system runs with default openhabian/pi password
-    checkForDefaultPassword() {
-        var proc = cockpit.spawn(["./checkDefaultUserPassword.sh"], {
-            superuser: "require",
-            err: "out",
-            directory: "/opt/openhab-cockpit/src/scripts",
-        });
-        proc.then((data) => {
-            if (data.includes("Default password detected!")) {
-                this.setState({
-                    defaultPasswordChanged: false,
-                    defaultUser: data.split("(")[1].split(")")[0],
-                });
-                return;
-            }
-            this.setState({ defaultPasswordChanged: true });
-        });
-        proc.catch((exception, data) => {
-            console.error(
-                "Error while verifying the system default password for openhabian/pi. Output: \n" +
-          data +
-          "\n\n Exception: \n" +
-          exception
-            );
-        });
+    async checkForDefaultPassword() {
+        var data = await sendCommand(["./checkDefaultUserPassword.sh"], "/opt/openhab-cockpit/src/scripts");
+        if (data.includes("Default password detected!")) {
+            this.setState({
+                defaultPasswordChanged: false,
+                defaultUser: data.split("(")[1].split(")")[0],
+            });
+            return;
+        }
+        this.setState({ defaultPasswordChanged: true });
     }
 
     // check new password if complex and valid. if yes run change password
@@ -81,44 +65,42 @@ export default class CheckDefaultUser extends React.Component {
     }
 
     // changes the password of the openhabian or pi user
-    cmdChangePassword() {
-        var proc = cockpit.spawn(
-            [
-                "./changeDefaultPassword.sh",
-                this.state.defaultUser,
-                this.state.newPassword,
-            ],
-            {
-                superuser: "require",
-                err: "out",
-                directory: "/opt/openhab-cockpit/src/scripts",
-            }
-        );
-        proc.then((data) => {
-            console.log("Password updated.\n" + data);
-            this.setState({
-                showSuccessMessage: true,
-                successful: !(
-                    data.toLowerCase().includes("error") ||
-          data.toLowerCase().includes("failed")
-                ),
-            });
+    async cmdChangePassword() {
+        var data = await sendCommand([
+            "./changeDefaultPassword.sh",
+            this.state.defaultUser,
+            this.state.newPassword,
+        ], "/opt/openhab-cockpit/src/scripts");
+        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
+            this.configFailure(data);
+        } else {
+            this.configSuccesful(data);
             this.checkForDefaultPassword();
+        }
+    }
+
+    // will be called if installation was succesfull
+    configSuccesful(data) {
+        console.log("Password updated.\n" + data);
+        this.setState({
+            installingUpdates: false,
+            showResult: true,
+            consoleMessage: data,
+            successful: true,
+            disableModalClose: false,
         });
-        proc.catch((exception, data) => {
-            var message =
-        "Could not change the default password of user '" +
-        this.state.defaultUser +
-        "'. Output: \n" +
-        data +
-        "\n\n Exception: \n" +
-        exception;
-            console.error(message);
-            this.setState({
-                showSuccessMessage: true,
-                successful: false,
-                resultMessage: message,
-            });
+    }
+
+    // will be called if installation failed
+    configFailure(data) {
+        var message = "Error could not install the latest openHAB-cockpit updates. Output: \n" + data;
+        console.error(message);
+        this.setState({
+            installingUpdates: false,
+            showResult: true,
+            successful: false,
+            consoleMessage: message,
+            disableModalClose: false,
         });
     }
 
@@ -132,16 +114,16 @@ export default class CheckDefaultUser extends React.Component {
             confirmNewPassword: "",
             displayInvalidPassword: false,
             invalidPasswordMessage: "Passwords empty or do not match.",
-            disableModalClose: false,
-            showSuccessMessage: false,
             successful: true,
-            resultMessage: "",
+            showResult: false,
+            consoleMessage: "Update done. Please reload the page to see them.",
+            disableModalClose: false,
         };
         // handles the modal open and close
         this.handleModalShow = (e) => {
             this.setState({
                 showModal: !this.state.showModal,
-                showSuccessMessage: false,
+                showResult: false,
                 newPassword: "",
                 confirmNewPassword: "",
                 displayInvalidPassword: false
@@ -172,25 +154,17 @@ export default class CheckDefaultUser extends React.Component {
             ? "display-none"
             : "display-block";
 
-        const showSuccessMessage = this.state.showSuccessMessage
+        const showResult = this.state.showResult
             ? "display-block"
             : "display-none";
 
-        const hidePasswordDialog = this.state.showSuccessMessage
+        const hidePasswordDialog = this.state.showResult
             ? "display-none"
             : "display-block";
 
         const displayInvalidPassword = this.state.displayInvalidPassword
             ? "display-block div-full-center"
             : "display-none";
-
-        const displaySuccess = this.state.successful
-            ? "display-block fa-5x success-icon"
-            : "display-none";
-
-        const displayError = this.state.successful
-            ? "display-none"
-            : "display-block fa-5x failure-icon";
 
         return (
             <div>
@@ -261,33 +235,14 @@ export default class CheckDefaultUser extends React.Component {
                             </button>
                         </div>
                     </div>
-                    <div className={showSuccessMessage}>
-                        <div className="div-full-center">
-                            <FontAwesomeIcon
-                className={displaySuccess}
-                icon={faCheckCircle}
-                            />
-                            <FontAwesomeIcon
-                className={displayError}
-                icon={faExclamationCircle}
-                            />
-                        </div>
-                        <div
-              style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
-              className="div-full-center"
-                        >
-                            <p>{this.state.resultMessage}</p>
-                        </div>
-                        <div className="div-full-center">
-                            <button
-                className="pf-c-button pf-m-primary"
-                onClick={(e) => {
-                    this.handleModalShow();
-                }}
-                            >
-                                Close
-                            </button>
-                        </div>
+                    <div className={showResult}>
+                        <ConfigurationDialog
+            onClose={this.handleModalShow}
+            packageName="user password"
+            showResult={this.state.showResult}
+            message={this.state.consoleMessage}
+            success={this.state.successful}
+                        />
                     </div>
                 </Modal>
             </div>

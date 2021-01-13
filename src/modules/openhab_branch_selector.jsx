@@ -1,77 +1,32 @@
 import React from "react";
-import cockpit from "cockpit";
 import RadioBox from "../components/radio-box.jsx";
 import Modal from "../components/modal.jsx";
 import InstallationDialog from "../components/installation-dialog.jsx";
+import { getInstalledopenHAB, getopenHABBranch, installopenHAB } from "../functions/openhab.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 export default class OHBranchSelector extends React.Component {
-    // Start the installation with update button. Selects the defined branche
-    updateBranche() {
-        // check for valid oh version to avoid unexpected downgrade
-        if (this.props.openhab !== "openHAB3" && this.props.openhab !== "openHAB2") {
-            console.error("detected openHAB version was not properly detected. Can not run the branch update");
-            return;
-        }
-        if (this.state.branchRelease === true) {
-            this.installScript(this.props.openhab, "stable");
-        }
-        if (this.state.branchTesting === true) {
-            this.installScript(this.props.openhab, "testing");
-        }
-        if (this.state.branchSnapshot === true) {
-            this.installScript(this.props.openhab, "unstable");
-        }
+    // load details for this component
+    async getDetails() {
+        var branch = await getopenHABBranch();
+        await this.setState({
+            openhab: await getInstalledopenHAB(),
+            branch: branch,
+        });
+        this.setCurrentBranch(branch);
     }
 
-    installScript(openhab, branch) {
-        this.setState({ showMenu: false, disableModalClose: true, brancheToInstall: branch });
-        console.log("Installation of '" + openhab + "' branch '" + branch + "' started.");
-        var proc = cockpit.spawn(["./openhab-setup.sh", openhab, branch], {
-            superuser: "require",
-            err: "out",
-            directory: "/opt/openhab-cockpit/src/scripts",
-        });
-        proc.then((data) => {
-            this.setState({
-                consoleMessage: data,
-                disableModalClose: false,
-                showResult: true,
-                successful: !(
-                    data.toLowerCase().includes("error") ||
-          data.toLowerCase().includes("failed")
-                ),
-            });
-            console.log("installation of '" + openhab + "' branch '" + branch + "' done. Output: \n" + data);
-        });
-        proc.catch((exception, data) => {
-            console.error(
-                "Error while installing " +
-          openhab +
-          " from branch (" +
-          branch +
-          ").\nException: " +
-          exception +
-          "\n\nOutput: " +
-          data
-            );
-            this.setState({
-                successful: false,
-                disableModalClose: false,
-                showResult: true,
-                consoleMessage:
-          "Error while installing " +
-          openhab +
-          " from branch (" +
-          branch +
-          ").\nException:" +
-          exception +
-          "\n\nOutput:" +
-          data,
-            });
-        });
+    // Reset displayed items
+    setCurrentBranch(branch) {
+        this.resetSelection();
+        if (branch === "release") this.setState({ branchRelease: true });
+        if (branch === "testing") this.setState({ branchTesting: true });
+        if (branch === "snapshot")
+            this.setState({ branchSnapshot: true });
     }
 
     // Resets the radio checkbox on nes selection
@@ -83,6 +38,59 @@ export default class OHBranchSelector extends React.Component {
         });
     }
 
+    // Start the installation with update button. Selects the defined branche
+    updateBranche() {
+        // check for valid oh version to avoid unexpected downgrade
+        if (this.state.openhab !== "openHAB3" && this.state.openhab !== "openHAB2") {
+            console.error("Error openHAB version was not properly detected. Can not run the branch update");
+            return;
+        }
+        if (this.state.branchRelease === true) {
+            this.installScript("stable", "release");
+        }
+        if (this.state.branchTesting === true) {
+            this.installScript("testing", "testing");
+        }
+        if (this.state.branchSnapshot === true) {
+            this.installScript("unstable", "snapshot");
+        }
+    }
+
+    // Installs openhab
+    async installScript(branch, displayName) {
+        this.setState({ showMenu: false, disableModalClose: true, brancheToInstall: displayName });
+        console.log("Installation of '" + this.state.openhab + "' branch '" + displayName + "' started.");
+        var data = await installopenHAB(this.state.openhab, branch);
+        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
+            this.installFailure(data);
+        } else {
+            this.installSuccesful(data);
+        }
+    }
+
+    // will be called if installation was succesfull
+    installSuccesful(data) {
+        console.log("installation of '" + this.state.openhab + "' branch '" + this.state.brancheToInstall + "' done. Output: \n" + data);
+        this.setState({
+            consoleMessage: data,
+            disableModalClose: false,
+            showResult: true,
+            successful: !(data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")),
+        });
+    }
+
+    // will be called if installation failed
+    installFailure(data) {
+        var msg = "Error while installing " + this.state.openhab + " from branch (" + this.state.brancheToInstall + "). Output: \n" + data;
+        console.error(msg);
+        this.setState({
+            successful: false,
+            disableModalClose: false,
+            showResult: true,
+            consoleMessage: msg
+        });
+    }
+
     constructor() {
         super();
         this.state = {
@@ -90,7 +98,6 @@ export default class OHBranchSelector extends React.Component {
             branchRelease: false,
             branchTesting: false,
             branchSnapshot: false,
-            repo: "",
             brancheToInstall: "",
             showMenu: true,
             showResult: false,
@@ -109,32 +116,17 @@ export default class OHBranchSelector extends React.Component {
         this.handleSelectionChange = (e) => {
             this.resetSelection();
             if (e === "release")
-                this.setState({
-                    branchRelease: true,
-                    repo: "deb https://dl.bintray.com/openhab/apt-repo2 stable main",
-                });
+                this.setState({ branchRelease: true });
             if (e === "testing")
-                this.setState({
-                    branchTesting: true,
-                    repo:
-            "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg testing main",
-                });
+                this.setState({ branchTesting: true });
             if (e === "snapshot")
-                this.setState({
-                    branchSnapshot: true,
-                    repo:
-            "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg unstable main",
-                });
+                this.setState({ branchSnapshot: true });
         };
     }
 
     /* Runs when component is build */
     componentDidMount() {
-        this.resetSelection();
-        if (this.props.branch === "release") this.setState({ branchRelease: true });
-        if (this.props.branch === "testing") this.setState({ branchTesting: true });
-        if (this.props.branch === "snapshot")
-            this.setState({ branchSnapshot: true });
+        this.getDetails();
     }
 
     render() {
@@ -151,7 +143,7 @@ export default class OHBranchSelector extends React.Component {
         disableModalClose={this.state.disableModalClose}
         onClose={this.handleClose}
         show={this.state.show}
-        header={this.props.openhab + " branches"}
+        header={this.state.openhab + " branches"}
             >
                 <div className={showMenuDialog}>
                     <RadioBox
@@ -203,7 +195,7 @@ export default class OHBranchSelector extends React.Component {
                 <div className={showInstallDialog}>
                     <InstallationDialog
             onClose={this.handleClose}
-            packageName={this.props.openhab + " (" + this.state.brancheToInstall + ")"}
+            packageName={this.state.openhab + " (" + this.state.brancheToInstall + ")"}
             showResult={this.state.showResult}
             message={this.state.consoleMessage}
             success={this.state.successful}

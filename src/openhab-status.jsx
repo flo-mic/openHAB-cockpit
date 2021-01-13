@@ -1,204 +1,58 @@
-import cockpit from "cockpit";
 import React from "react";
 import OHServiceDetails from "./modules/service_details.jsx";
 import OHBranchSelector from "./modules/openhab_branch_selector.jsx";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
+import {
+    getInstalledopenHAB,
+    getServiceStatus,
+    getopenHABVersion,
+    getopenHABBranch,
+    getopenHABURLs,
+    getopenHABConsoleIP,
+} from "./functions/openhab.js";
 
 import "./custom.scss";
 import "./patternfly.scss";
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 export default class OHStatus extends React.Component {
-    get_details() {
-        this.getInstalledopenHAB();
-        this.get_oh_service_status();
-        this.get_oh_cli_details();
-        this.get_oh_selected_branch();
-        this.getConsoleDetails();
+    // read all openhab details
+    async get_details() {
+        this.setState({
+            openhab: await getInstalledopenHAB(),
+            serviceStatus: await getServiceStatus(),
+            version: await getopenHABVersion(),
+            openhabBranch: await getopenHABBranch(),
+            consoleStatus:
+        (await getopenHABConsoleIP()) == "127.0.0.1" ? "local" : "remote",
+        });
+        this.getURLs();
     }
 
-    // read data from the openhab cli
-    get_oh_cli_details() {
-        var proc = cockpit.spawn(["openhab-cli", "info"]);
-        proc.stream((data) => {
-            this.get_oh_cli_version(data);
-            this.get_oh_cli_urls(data);
+    // refreshs the service interval. Timer will be set on component mound
+    async refreshService() {
+        this.setState({
+            serviceStatus: await getServiceStatus(),
         });
     }
 
-    // read openhab version from oh cli
-    get_oh_cli_version(data) {
-        data.split("\n").forEach((element) => {
-            if (element.includes("Version:")) {
-                this.setState({
-                    version: element.split("Version:")[1].trim(),
-                    github_release_link:
-            "https://github.com/openhab/openhab-distro/releases/tag/" +
-            element.split("Version:")[1].split("(")[0].trim(),
-                });
-            }
+    // format the urls in  href objects
+    async getURLs() {
+        var urls = await getopenHABURLs();
+        this.setState({
+            url: (
+                <div>
+                    <a target="_blank" rel="noopener noreferrer" href={urls.http}>
+                        {urls.http.replace("http://", "")}
+                    </a>
+                    <br />
+                    <a target="_blank" rel="noopener noreferrer" href={urls.https}>
+                        {urls.https.replace("https://", "")}
+                    </a>
+                </div>
+            ),
         });
-    }
-
-    // read openhab urls from oh cli
-    get_oh_cli_urls(data) {
-        data.split("\n").forEach((element) => {
-            if (element.includes("URLs:")) {
-                this.setState({
-                    url: (
-                        <div>
-                            <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href={element.split("URLs:")[1].trim()}
-                            >
-                                {element.split("URLs:")[1].trim()}
-                            </a>
-                            <br />
-                            <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href={element
-                        .split("URLs:")[1]
-                        .trim()
-                        .replace("http://", "https://")}
-                            >
-                                {element
-                                        .split("URLs:")[1]
-                                        .trim()
-                                        .replace("http://", "https://")}
-                            </a>
-                        </div>
-                    ),
-                });
-            }
-        });
-    }
-
-    // check if oh service is running or dead
-    get_oh_service_status() {
-        var proc = cockpit.spawn([
-            "systemctl",
-            "show",
-            "-p",
-            "SubState",
-            "--value",
-            "openhab.service",
-        ]);
-        proc.stream((data) => {
-            this.setState({ serviceStatus: data });
-        });
-    }
-
-    // read the selected oh branch
-    get_oh_selected_branch() {
-        cockpit
-                .file("/etc/apt/sources.list.d/openhab.list")
-                .read()
-                .then((data, tag) => {
-                    this.setState({
-                        openhabBranch: this.get_oh_branch_from_repo_string(data),
-                    });
-                });
-    }
-
-    // checks which oh branch is used input is the apt source list content
-    get_oh_branch_from_repo_string(data) {
-        if (
-            data.includes(
-                "deb https://dl.bintray.com/openhab/apt-repo2 stable main"
-            ) &&
-      !data.includes(
-          "#deb https://dl.bintray.com/openhab/apt-repo2 stable main"
-      )
-        ) {
-            return "release";
-        }
-        if (
-            data.includes(
-                "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg unstable main"
-            ) &&
-      !data.includes(
-          "#deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg unstable main"
-      )
-        ) {
-            return "snapshot";
-        }
-        if (
-            data.includes(
-                "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg testing main"
-            ) &&
-      !data.includes(
-          "#deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg testing main"
-      )
-        ) {
-            return "testing";
-        }
-        return "-";
-    }
-
-    // check if oh2 or oh3 is installed
-    getInstalledopenHAB() {
-        var proc = cockpit.spawn(["./openhab2-isInstalled.sh"], {
-            superuser: "require",
-            err: "out",
-            directory: "/opt/openhab-cockpit/src/scripts",
-        });
-        proc.then((data) => {
-            if (data.includes("openHAB2")) {
-                this.setState({ openhab: "openHAB2" });
-                return;
-            }
-            if (data.includes("openHAB3")) {
-                this.setState({ openhab: "openHAB3" });
-                return;
-            }
-            console.error(
-                'Detected openhab version "' +
-          data +
-          '" is not detected as openHAB2 or openHAB3.'
-            );
-        });
-        proc.catch((exception, data) => {
-            console.error(
-                "Error while reading openHAB version 2 or 3 from system. Readed data: \n" +
-          data +
-          "\n\n Exception: \n" +
-          exception
-            );
-        });
-    }
-
-    // get the ssh host
-    getConsoleDetails() {
-        cockpit.file("/var/lib/" + this.state.openhab.toLowerCase().replace("3", "") + "/etc/org.apache.karaf.shell.cfg", {
-            superuser: "require",
-            err: "out",
-        }).read()
-                .then(data => {
-                    console.log("1");
-
-                    if (data.includes("sshHost") && data.includes("sshPort")) {
-                        console.log("2");
-
-                        this.setState({
-                            consoleIP: data.split("sshHost")[1].split("\n")[0].replace("=", "").trim(),
-                            consolePort: data.split("sshPort")[1].split("\n")[0].replace("=", "").trim(),
-                        }, () => {
-                            console.log("3");
-                            this.setState({ consoleStatus: (this.state.consoleIP === "127.0.0.1") ? "local" : "remote" });
-                        });
-                    } else {
-                        console.log("4");
-
-                        console.error("Can not read the console ip and port from file '" + "/var/lib/" + this.state.openhab.toLowerCase().replace("3", "") + "/etc/org.apache.karaf.shell.cfg'. Output:\n" + data);
-                    }
-                })
-                .catch((exception, data) => {
-                    console.log("5");
-
-                    console.error("Could not read karaf console settings from file '" + "/var/lib/" + this.state.openhab.toLowerCase().replace("3", "") + "/etc/org.apache.karaf.shell.cfg'. Output: \n" + data + "\n\n Exception: \n" + exception);
-                });
-        console.log("6");
     }
 
     constructor() {
@@ -209,11 +63,8 @@ export default class OHStatus extends React.Component {
             openhabBranch: "-",
             github_release_link:
         "https://github.com/openhab/openhab-distro/releases/",
-            serviceEnabled: "-",
             serviceStatus: "-",
             consoleStatus: "-",
-            consoleIP: "-",
-            consolePort: "-",
             url: "-",
             showBrancheSelector: false,
             showServiceDetails: false,
@@ -224,13 +75,7 @@ export default class OHStatus extends React.Component {
             if (this.state.showBrancheSelector == false) {
                 this.setState({
                     showBrancheSelector: true,
-                    modalContent: (
-                        <OHBranchSelector
-              onClose={this.handleBrancheSelector}
-              branch={this.state.openhabBranch}
-              openhab={this.state.openhab}
-                        />
-                    ),
+                    modalContent: (<OHBranchSelector onClose={this.handleBrancheSelector} />),
                 });
             } else {
                 this.setState({
@@ -248,7 +93,6 @@ export default class OHStatus extends React.Component {
                     showServiceDetails: true,
                     modalContent: (
                         <OHServiceDetails
-              openhab={this.state.openhab}
               onClose={this.handleServiceDetails}
                         />
                     ),
@@ -267,9 +111,10 @@ export default class OHStatus extends React.Component {
     /* Runs when component is build */
     componentDidMount() {
         this.get_details();
-        this.interval = setInterval(() => this.get_oh_service_status(), 15000);
+        this.interval = setInterval(() => this.refreshService(), 15000);
     }
 
+    // runs when component will be unmount
     componentWillUnmount() {
         clearInterval(this.interval);
     }

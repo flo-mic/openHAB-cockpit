@@ -104,7 +104,7 @@ export default class InstallationDialog extends React.Component {
                     this.showConsoleOutput();
                 }}
                             >
-                                Show install messages
+                                Show console messages
                             </button>
                         </div>
                     </div>

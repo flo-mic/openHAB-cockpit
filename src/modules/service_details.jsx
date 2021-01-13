@@ -1,47 +1,33 @@
-import cockpit from "cockpit";
 import React from "react";
+import cockpit from "cockpit";
 import Dropdown from "../components/dropdown.jsx";
 import Modal from "../components/modal.jsx";
+import { getopenHABServiceName, sendServiceCommand, getInstalledopenHAB } from "../functions/openhab.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 export default class OHServiceDetails extends React.Component {
-    refreshService() {
-        var proc = cockpit.spawn(["systemctl", "status", this.getServiceName()]);
+    async getDetails() {
+        this.setState({
+            openhab: await getInstalledopenHAB()
+        });
+    }
+
+    async refreshService() {
+        var proc = cockpit.spawn(["systemctl", "status", (await getopenHABServiceName())]);
         proc.stream((data) => {
             this.setState({ message: data });
         });
-    }
-
-    sendCommand(command) {
-        var proc = cockpit.spawn(["systemctl", command, this.getServiceName()], {
-            superuser: "try",
-            err: "out",
-        });
-        proc
-                .stream((data) => {})
-                .fail(function (ex) {
-                    var err =
-          'The following error occoured while running this command. \nCommand: "systemctl ' +
-          command +
-          ' openhab service.\n"' +
-          ex;
-                    console.error(err);
-                });
-    }
-
-    getServiceName() {
-        if (this.props.openhab === "openHAB2") {
-            return "openhab2";
-        }
-        return "openhab";
     }
 
     constructor() {
         super();
         this.state = {
             show: true,
+            openhab: "",
             message: "-",
             showDropdown: false,
             disableModalClose: false,
@@ -62,14 +48,15 @@ export default class OHServiceDetails extends React.Component {
             this.setState({
                 showDropdown: false,
             });
-            this.sendCommand(command);
+            sendServiceCommand(command);
         };
     }
 
     /* Runs when component is build */
     componentDidMount() {
+        this.getDetails();
         this.refreshService();
-        this.interval = setInterval(() => this.refreshService(), 1000);
+        this.interval = setInterval(() => this.refreshService(), 3000);
     }
 
     componentWillUnmount() {
@@ -82,7 +69,7 @@ export default class OHServiceDetails extends React.Component {
         disableModalClose={this.state.disableModalClose}
         onClose={this.handleClose}
         show={this.state.show}
-        header={this.props.openhab + " service status"}
+        header={this.state.openhab + " service status"}
             >
                 <div className="display-flex-justify-space-between">
                     <h4>Status: </h4>

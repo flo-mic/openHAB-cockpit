@@ -1,91 +1,74 @@
 import React from "react";
-import cockpit from "cockpit";
 import Modal from "../components/modal.jsx";
 import InstallationDialog from "../components/installation-dialog.jsx";
 import { Alert } from "@patternfly/react-core";
+import { sendCommand, sendScript } from "../functions/cockpit.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 export default class CheckOpenHABCockpitUpdates extends React.Component {
     // checking for updates on github
-    checkForUpdates() {
-        var proc = cockpit.spawn(["git", "fetch", "--dry-run"], {
-            superuser: "require",
-            err: "out",
-            directory: "/opt/openhab-cockpit",
-        });
-        proc.then((data) => {
-            // if prcess returns empty string, no update is available
-            if (data === "") {
-                this.setState({
-                    updatesAvailable: false,
-                });
-                return;
-            }
-            // if result containssomething an update will be available
-            this.setState({ updatesAvailable: true });
-        });
-        proc.catch((exception, data) => {
-            console.error(
-                "Error while checking for openHAB-cockpit updates on github. Readed data: \n" +
-          data +
-          "\n\n Exception: \n" +
-          exception
-            );
-        });
+    async checkForUpdates() {
+        var data = await sendCommand(["git", "fetch", "--dry-run"], "/opt/openhab-cockpit");
+        // if prcess returns empty string, no update is available
+        if (data === "") {
+            this.setState({
+                updatesAvailable: false,
+            });
+            return;
+        }
+        // if result containssomething an update will be available
+        this.setState({ updatesAvailable: true });
     }
 
     // updates the openHAB-cockpit
-    update() {
-        this.setState({ showMenu: false, installingUpdates: true }, () => {
-            var proc = cockpit.script(
-                `
-                rm -r /opt/openhab-cockpit
-                git clone https://github.com/flo-mic/openHAB-cockpit.git /opt/openhab-cockpit
-                cd openhab-cockpit
-                chmod +x src/scripts/*.sh
-                mkdir -p /usr/share/cockpit/openhab
-                cp -r dist/* /usr/share/cockpit/openhab
-                `,
-                [],
-                {
-                    superuser: "require",
-                    err: "out",
-                    directory: "/opt",
-                }
-            );
-            proc.then((data) => {
-                console.log("New updates for openHAB-cockpit installed.\n" + data);
-                this.setState(
-                    {
-                        installingUpdates: false,
-                        showResult: true,
-                        consoleMessage: data,
-                        successful: !(
-                            data.toLowerCase().includes("error") ||
-              data.toLowerCase().includes("failed")
-                        ),
-                    },
-                    () => {
-                        this.checkForUpdates();
-                    }
-                );
+    async update() {
+        this.setState({ showMenu: false, installingUpdates: true, disableModalClose: true });
+        var data = await sendScript(
+            `
+            rm -r /opt/openhab-cockpit
+            git clone https://github.com/flo-mic/openHAB-cockpit.git /opt/openhab-cockpit
+            cd openhab-cockpit
+            chmod +x src/scripts/*.sh
+            mkdir -p /usr/share/cockpit/openhab
+            cp -r dist/* /usr/share/cockpit/openhab
+            `,
+            [], "/opt");
+
+        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
+            this.installFailure(data);
+        } else {
+            this.installSuccesful(data);
+        }
+    }
+
+    // will be called if installation was succesfull
+    installSuccesful(data) {
+        console.log("New updates for openHAB-cockpit installed.\n" + data);
+        this.setState(
+            {
+                installingUpdates: false,
+                showResult: true,
+                consoleMessage: data,
+                successful: true,
+                disableModalClose: false,
             });
-            proc.catch((exception, data) => {
-                var message =
-          "Could not install the latest openHAB-cockpit updates. Readed data: \n" +
-          data +
-          "\n\n Exception: \n" +
-          exception;
-                console.error(message);
-                this.setState({
-                    installingUpdates: false,
-                    showResult: true,
-                    successful: false,
-                    consoleMessage: message,
-                });
-            });
+        this.checkForUpdates();
+    }
+
+    // will be called if installation failed
+    installFailure(data) {
+        var message = "Error could not install the latest openHAB-cockpit updates. Output: \n" + data;
+        console.error(message);
+        this.setState({
+            installingUpdates: false,
+            showResult: true,
+            successful: false,
+            consoleMessage: message,
+            disableModalClose: false,
         });
     }
 

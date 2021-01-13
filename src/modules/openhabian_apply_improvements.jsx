@@ -1,60 +1,52 @@
-import cockpit from "cockpit";
 import React from "react";
 import RadioBox from "../components/radio-box.jsx";
 import Modal from "../components/modal.jsx";
 import InstallationDialog from "../components/installation-dialog.jsx";
+import { sendCommand } from "../functions/cockpit.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 export default class OpenHABianApplyImprovements extends React.Component {
-    installPackage() {
-        var message =
-      "Package " + this.state.selectedPackageName + " will be updated.";
+    async installPackage() {
+        var message = "Package " + this.state.selectedPackageName + " will be updated.";
         console.log(message);
         this.setState(
             {
                 showMenu: false,
                 disableModalClose: true,
-            },
-            () => {
-                var proc = cockpit.spawn(
-                    ["./openhabian-apply-improvments.sh", this.state.selectedPackage],
-                    {
-                        superuser: "require",
-                        err: "out",
-                        directory: "/opt/openhab-cockpit/src/scripts",
-                    }
-                );
-                proc.then((data) => {
-                    console.log("Package installation done. See Result below:.\n" + data);
-                    this.setState({
-                        consoleMessage: data,
-                        disableModalClose: false,
-                        showResult: true,
-                        successful: !(
-                            data.toLowerCase().includes("error") ||
-              data.toLowerCase().includes("failed")
-                        ),
-                    });
-                });
-                proc.catch((exception, data) => {
-                    var message =
-            "Could not install the package '" +
-            this.state.selectedPackageName +
-            "'. Output: \n" +
-            data +
-            "\n\n Exception: \n" +
-            exception;
-                    console.error(message);
-                    this.setState({
-                        showResult: true,
-                        successful: false,
-                        consoleMessage: message,
-                    });
-                });
-            }
-        );
+            });
+        var data = await sendCommand(["./openhabian-apply-improvments.sh", this.state.selectedPackage], "/opt/openhab-cockpit/src/scripts");
+        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
+            this.installFailure(data);
+        } else {
+            this.installSuccesful(data);
+        }
+    }
+
+    // will be called if installation was succesfull
+    installSuccesful(data) {
+        console.log("Package installation done. See Result below:.\n" + data);
+        this.setState({
+            consoleMessage: data,
+            disableModalClose: false,
+            showResult: true,
+            successful: true,
+        });
+    }
+
+    // will be called if installation failed
+    installFailure(data) {
+        var message = "Could not install the package '" + this.state.selectedPackageName + "'. Output: \n" + data;
+        console.error(message);
+        this.setState({
+            showResult: true,
+            successful: false,
+            consoleMessage: message,
+            disableModalClose: false,
+        });
     }
 
     // Resets all selection elements. important for interactiv gui
