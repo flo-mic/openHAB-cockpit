@@ -1,4 +1,4 @@
-import { readFile, sendCommand } from "./cockpit.js";
+import { readFile, sendCommand, replaceFile } from "./cockpit.js";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
@@ -124,8 +124,8 @@ export async function getopenHABConsoleIP() {
     try {
         var result = await readFile("/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg");
         if (result !== undefined && result !== "") {
-            if (result.includes("sshHost")) {
-                return result.split("sshHost")[1].split("\n")[0].replace("=").trim();
+            if (result.includes("sshHost =")) {
+                return result.split("sshHost =")[1].split("\n")[0].trim();
             }
         }
         console.error(
@@ -134,6 +134,36 @@ export async function getopenHABConsoleIP() {
     } catch (exception) {
         console.error("There was an error while reading th econsole ip from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'. Exception: \n");
     }
+}
+
+// get openhab console ip
+export async function getopenHABConsolePort() {
+    var openhab = await getopenHABServiceName();
+    try {
+        var result = await readFile("/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg");
+        if (result !== undefined && result !== "") {
+            if (result.includes("sshPort =")) {
+                return result.split("sshPort =")[1].split("\n")[0].trim();
+            }
+        }
+        console.error(
+            "Can not read openHAB console port from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'."
+        );
+    } catch (exception) {
+        console.error("There was an error while reading th econsole port from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'. Exception: \n");
+    }
+}
+
+// configures the openHAB remote console ip and port
+export async function setopenHABRemoteConsole(ip, port) {
+    var path = "/var/lib/" + await getopenHABServiceName() + "/etc/org.apache.karaf.shell.cfg";
+    var data = await readFile(path);
+    var currentIP = await getopenHABConsoleIP();
+    data = data.replace("sshHost = " + currentIP, "sshHost = " + ip);
+    var currentPort = await getopenHABConsolePort();
+    data = data.replace("sshPort = " + currentPort, "sshPort = " + port);
+    sendServiceCommand("restart");
+    return await replaceFile(path, data);
 }
 
 // installs the selected openhab

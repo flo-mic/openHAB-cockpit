@@ -29,6 +29,24 @@ export async function readFile(filePath) {
             });
 }
 
+// replace a file on server with a given string
+export async function replaceFile(filePath, newContent) {
+    return await cockpit
+            .file(filePath, {
+                superuser: "require",
+                err: "out",
+            })
+            .replace(newContent)
+            .then((data) => {
+                return data;
+            })
+            .catch((exception, data) => {
+                var msg = "Could not replace the file '" + filePath + "'. Exception: \n" + exception;
+                console.error(msg);
+                return msg;
+            });
+}
+
 // run command on server with result
 export async function sendCommand(commandArray, directory) {
     // set default directory if not provided to function

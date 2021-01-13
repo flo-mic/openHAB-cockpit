@@ -1,6 +1,7 @@
 import React from "react";
 import OHServiceDetails from "./modules/service_details.jsx";
 import OHBranchSelector from "./modules/openhab_branch_selector.jsx";
+import OHConsole from "./modules/openhab_console.jsx";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
 import {
     getInstalledopenHAB,
@@ -68,6 +69,7 @@ export default class OHStatus extends React.Component {
             url: "-",
             showBrancheSelector: false,
             showServiceDetails: false,
+            showConsoleSetings: false,
             modalContent: <div />,
         };
         // Opens the branche selector menue
@@ -102,6 +104,26 @@ export default class OHStatus extends React.Component {
                     showServiceDetails: false,
                     modalContent: <div />,
                 });
+            }
+        };
+
+        // Opens the service status details
+        this.handleConsoleSettings = (e) => {
+            if (this.state.showConsoleSetings == false) {
+                this.setState({
+                    showConsoleSetings: true,
+                    modalContent: (
+                        <OHConsole
+              onClose={this.handleConsoleSettings}
+                        />
+                    ),
+                });
+            } else {
+                this.setState({
+                    showConsoleSetings: false,
+                    modalContent: <div />,
+                });
+                this.get_details();
             }
         };
 
@@ -170,7 +192,7 @@ export default class OHStatus extends React.Component {
                                 <td>
                                     <a
                     onClick={(e) => {
-                        this.handleServiceDetails();
+                        this.handleConsoleSettings();
                     }}
                                     >
                                         {this.state.consoleStatus}
