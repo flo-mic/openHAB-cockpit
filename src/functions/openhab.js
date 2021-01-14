@@ -1,4 +1,4 @@
-import { readFile, sendCommand, replaceFile } from "./cockpit.js";
+import { readFile, sendCommand, replaceFile, sendScript } from "./cockpit.js";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
@@ -34,7 +34,7 @@ export async function getopenHABVersion() {
         );
     } catch (exception) {
         console.error(
-            "Can not read openHAB version from openhab-cli. Exception: \n"
+            "Can not read openHAB version from openhab-cli. Exception: \n" + exception
         );
     }
 }
@@ -52,6 +52,44 @@ export async function getopenHABURLs() {
     console.error(
         "Can not read openHAB urls from openhab-cli."
     );
+}
+
+// returns the openhab log directory
+export async function getopenHABLogDir() {
+    try {
+        var result = await sendCommand(["openhab-cli", "info"]);
+        if (result !== undefined && result !== "") {
+            if (result.includes("OPENHAB_LOGDIR")) {
+                return result.split("OPENHAB_LOGDIR")[1].split("|")[1].trim();
+            }
+        }
+        console.error(
+            "Can not read openHAB log path from openhab-cli."
+        );
+    } catch (exception) {
+        console.error(
+            "Can not read openHAB log path from openhab-cli. Exception: \n" + exception
+        );
+    }
+}
+
+// returns the openhab backup directory
+export async function getopenHABBackupDir() {
+    try {
+        var result = await sendCommand(["openhab-cli", "info"]);
+        if (result !== undefined && result !== "") {
+            if (result.includes("OPENHAB_BACKUPS")) {
+                return result.split("OPENHAB_BACKUPS")[1].split("|")[1].trim();
+            }
+        }
+        console.error(
+            "Can not read openHAB backup path from openhab-cli."
+        );
+    } catch (exception) {
+        console.error(
+            "Can not read openHAB backup path from openhab-cli. Exception: \n" + exception
+        );
+    }
 }
 
 // returns the service name of the installed openhab
@@ -132,7 +170,7 @@ export async function getopenHABConsoleIP() {
             "Can not read openHAB console ip from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'."
         );
     } catch (exception) {
-        console.error("There was an error while reading th econsole ip from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'. Exception: \n");
+        console.error("There was an error while reading the console ip from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'. Exception: \n" + exception);
     }
 }
 
@@ -150,7 +188,7 @@ export async function getopenHABConsolePort() {
             "Can not read openHAB console port from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'."
         );
     } catch (exception) {
-        console.error("There was an error while reading th econsole port from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'. Exception: \n");
+        console.error("There was an error while reading the console port from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'. Exception: \n" + exception);
     }
 }
 
@@ -173,4 +211,29 @@ export async function installopenHAB(openhab, branch) {
         result = "There was an error while installing openhab version '" + openhab + "' with branch '" + branch + "'.";
     }
     return result;
+}
+
+// get openhab backups
+export async function getopenHABBackups() {
+    var directory = await getopenHABBackupDir();
+    var backups = [];
+    try {
+        var result = await sendScript("ls -lah | awk '{print $9, $5}' | tail -5", [], directory);
+        if (result !== undefined && result !== "") {
+            result.split("\n").forEach(element => {
+                if (element.trim() !== "" && !element.startsWith(". ") && !element.startsWith(".. ")) {
+                    var name = element.split(" ")[0];
+                    backups.push({ name: name, size: element.split(" ")[1], date: getDateFromBackupName(name) });
+                }
+            });
+            return backups;
+        }
+    } catch (exception) {
+        console.error("There was an error while reading available openHAB backups in '" + directory + "'. Exception: \n" + exception);
+    }
+}
+
+function getDateFromBackupName(name) {
+    var tmp = (name.split("-")[2] + "_" + name.split("-")[3].split(".")[0]).split("_");
+    return new Date("20" + tmp[0] + "-" + tmp[1] + "-" + tmp[2] + "T" + tmp[3] + ":" + tmp[4] + ":" + tmp[5] + "Z");
 }

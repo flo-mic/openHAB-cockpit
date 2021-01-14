@@ -5,16 +5,17 @@ import ScrollToBottom from "react-scroll-to-bottom";
 import { TextInput } from "@patternfly/react-core";
 import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getopenHABLogDir } from "../functions/openhab.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
 
 export default class LogViewer extends React.Component {
     /* Watch the openhab event log for new changes */
-    read_OpenHABLog() {
+    async read_OpenHABLog() {
         this.setState({
             watchProcessOpenhab: cockpit
-                    .file("/var/log/openhab/openhab.log")
+                    .file(await getopenHABLogDir() + "/openhab.log")
                     .watch((data, filename) => {
                         if (filename) {
                             // if this is not the first run start here to read only changes since last run
@@ -62,11 +63,11 @@ export default class LogViewer extends React.Component {
     }
 
     /* Watch the events log for new changes */
-    read_EventsLog() {
+    async read_EventsLog() {
     /* Watch the events log for new changes */
         this.setState({
             watchProcessEvents: cockpit
-                    .file("/var/log/openhab/events.log")
+                    .file(await getopenHABLogDir() + "/events.log")
                     .watch((data, filename) => {
                         if (filename) {
                             // if this is not the first run start here to read only changes since last run

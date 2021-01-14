@@ -1,6 +1,7 @@
 import React from "react";
 import LogViewer from "./modules/logviewer.jsx";
 import OpenHABianApplyImprovements from "./modules/openhabian_apply_improvements.jsx";
+import OHBackupRestore from "./modules/openhab_backup_restore.jsx";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
 
 import "./custom.scss";
@@ -12,6 +13,7 @@ export default class Tools extends React.Component {
         this.state = {
             showLogViewer: false,
             showApplyImprovements: false,
+            showBackupRestore: false,
             modalContent: <div />,
         };
         // handles the modal dialog of the logviewer
@@ -28,6 +30,14 @@ export default class Tools extends React.Component {
                 this.setState({ showApplyImprovements: true, modalContent: <OpenHABianApplyImprovements onClose={this.handleImprovements} /> });
             } else {
                 this.setState({ showApplyImprovements: false, modalContent: <div /> });
+            }
+        };
+        // handles the modal dialog of backup and restore section
+        this.handleBackupRestore = (e) => {
+            if (this.state.showBackupRestore == false) {
+                this.setState({ showBackupRestore: true, modalContent: <OHBackupRestore onClose={this.handleBackupRestore} /> });
+            } else {
+                this.setState({ showBackupRestore: false, modalContent: <div /> });
             }
         };
     }
@@ -66,6 +76,17 @@ export default class Tools extends React.Component {
                      }}
                                     >
                                         Apply Improvements
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a
+                     onClick={(e) => {
+                         this.handleBackupRestore();
+                     }}
+                                    >
+                                        Backup & Restore
                                     </a>
                                 </td>
                             </tr>
