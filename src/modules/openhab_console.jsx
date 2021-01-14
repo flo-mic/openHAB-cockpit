@@ -38,7 +38,7 @@ export default class OHConsole extends React.Component {
 
     // update console configuration
     async updateConfiguration() {
-        this.setState({ showMenu: false, showLoading: true, disableModalClose: true });
+        this.setState({ showMenu: false, disableModalClose: true });
         console.log("Setting openhab console ip '" + this.state.consoleIP + "' and port '" + this.state.consolePort + "'.");
         var data = await setopenHABRemoteConsole(this.state.consoleIP, this.state.consolePort);
         if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
@@ -52,7 +52,6 @@ export default class OHConsole extends React.Component {
     configSuccesful(data) {
         console.log("openHAB console settings updated.\n" + data);
         this.setState({
-            showLoading: false,
             showResult: true,
             consoleMessage: data,
             successful: true,
@@ -67,7 +66,6 @@ export default class OHConsole extends React.Component {
       data;
         console.error(message);
         this.setState({
-            showLoading: false,
             showResult: true,
             successful: false,
             consoleMessage: message,
@@ -140,7 +138,7 @@ export default class OHConsole extends React.Component {
         const showMenu = this.state.showMenu
             ? "display-block"
             : "display-none";
-        const showLoading = this.state.showResult ? "display-block" : "display-none";
+        const showLoading = !this.state.showMenu ? "display-block" : "display-none";
         const displayValidationError = (this.state.displayValidationError === "") ? "display-none" : "display-block";
         const showAdvanced = (this.state.selection === "custom") ? "display-block div-full-center" : "display-none";
 

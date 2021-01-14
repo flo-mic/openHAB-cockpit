@@ -30,7 +30,7 @@ export default class CheckDefaultUser extends React.Component {
       this.state.newPassword === this.state.confirmNewPassword
         ) {
             if (this.checkPasswordStrength(this.state.newPassword) == true) {
-                this.setState({ displayInvalidPassword: false });
+                this.setState({ displayInvalidPassword: false, hidePasswordDialog: true });
                 this.cmdChangePassword();
             } else {
                 this.setState({
@@ -83,7 +83,7 @@ export default class CheckDefaultUser extends React.Component {
     configSuccesful(data) {
         console.log("Password updated.\n" + data);
         this.setState({
-            installingUpdates: false,
+            showLoading: false,
             showResult: true,
             consoleMessage: data,
             successful: true,
@@ -96,7 +96,7 @@ export default class CheckDefaultUser extends React.Component {
         var message = "Error could not install the latest openHAB-cockpit updates. Output: \n" + data;
         console.error(message);
         this.setState({
-            installingUpdates: false,
+            showLoading: false,
             showResult: true,
             successful: false,
             consoleMessage: message,
@@ -154,9 +154,7 @@ export default class CheckDefaultUser extends React.Component {
             ? "display-none"
             : "display-block";
 
-        const showResult = this.state.showResult
-            ? "display-block"
-            : "display-none";
+        const showLoading = this.state.hidePasswordDialog ? "display-block" : "display-none";
 
         const hidePasswordDialog = this.state.showResult
             ? "display-none"
@@ -235,7 +233,7 @@ export default class CheckDefaultUser extends React.Component {
                             </button>
                         </div>
                     </div>
-                    <div className={showResult}>
+                    <div className={showLoading}>
                         <ConfigurationDialog
             onClose={this.handleModalShow}
             packageName="user password"

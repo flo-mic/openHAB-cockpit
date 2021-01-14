@@ -68,7 +68,7 @@ export default class InstallationDialog extends React.Component {
             <div>
                 <div className={showInstallingSpinner}>
                     <div className="div-full-center">
-                        <h3>installing {this.props.packageName} ...</h3>
+                        <h4>installing {this.props.packageName} ...</h4>
                     </div>
                     <div className="div-full-center" style={{ paddingTop: "1rem", minHeight: "86px" }}>
                         <span
