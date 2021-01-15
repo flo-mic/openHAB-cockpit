@@ -1,7 +1,8 @@
 import React from "react";
 import Modal from "../components/modal.jsx";
 import { Alert, TextInput } from "@patternfly/react-core";
-import { sendCommand } from "../functions/cockpit.js";
+import { validateResponse } from "../functions/helpers.js";
+import { checkDefaultSystemPassword, setDefaultSystemPassword } from "../functions/openhabian.js";
 import ProgressDialog from "../components/progress-dialog.jsx";
 
 import "../custom.scss";
@@ -12,11 +13,10 @@ import "regenerator-runtime/runtime";
 export default class CheckDefaultUser extends React.Component {
     // check if the system runs with default openhabian/pi password
     async checkForDefaultPassword() {
-        var data = await sendCommand(["./checkDefaultUserPassword.sh"], "/opt/openhab-cockpit/src/scripts");
-        if (data.includes("Default password detected!")) {
+        var data = await checkDefaultSystemPassword();
+        if (data === false) {
             this.setState({
                 defaultPasswordChanged: false,
-                defaultUser: data.split("(")[1].split(")")[0],
             });
             return;
         }
@@ -66,16 +66,12 @@ export default class CheckDefaultUser extends React.Component {
 
     // changes the password of the openhabian or pi user
     async cmdChangePassword() {
-        var data = await sendCommand([
-            "./changeDefaultPassword.sh",
-            this.state.defaultUser,
-            this.state.newPassword,
-        ], "/opt/openhab-cockpit/src/scripts");
-        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
-            this.configFailure(data);
-        } else {
+        var data = await setDefaultSystemPassword(this.state.newPassword);
+        if (validateResponse(data)) {
             this.configSuccesful(data);
             this.checkForDefaultPassword();
+        } else {
+            this.configFailure(data);
         }
     }
 
@@ -109,7 +105,6 @@ export default class CheckDefaultUser extends React.Component {
         this.state = {
             defaultPasswordChanged: true,
             showModal: false,
-            defaultUser: "openhabian",
             newPassword: "",
             confirmNewPassword: "",
             displayInvalidPassword: false,
@@ -173,8 +168,7 @@ export default class CheckDefaultUser extends React.Component {
             title="Default password not changed!"
                     >
                         <p>
-                            Running your system with the default password of{" "}
-                            {this.state.defaultUser} is a security risk and should not be
+                            Running your system with the default password for openhabian/pi is a security risk and should not be
                             done.{" "}
                             <a
                 onClick={(e) => {
@@ -190,7 +184,7 @@ export default class CheckDefaultUser extends React.Component {
           disableModalClose={this.state.disableModalClose}
           onClose={this.handleModalShow}
           show={this.state.showModal}
-          header={"Change user password of " + this.state.defaultUser}
+          header="Change user password."
                 >
                     <div className={hidePasswordDialog}>
                         <div className="div-full-center">

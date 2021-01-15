@@ -3,6 +3,7 @@ import RadioBox from "../components/radio-box.jsx";
 import Modal from "../components/modal.jsx";
 import ProgressDialog from "../components/progress-dialog.jsx";
 import { getInstalledopenHAB, getopenHABBranch, installopenHAB } from "../functions/openhab.js";
+import { validateResponse } from "../functions/helpers.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
@@ -57,10 +58,10 @@ export default class OHBranchSelector extends React.Component {
         this.setState({ showMenu: false, disableModalClose: true, brancheToInstall: displayName });
         console.log("Installation of '" + this.state.openhab + "' branch '" + displayName + "' started.");
         var data = await installopenHAB(this.state.openhab, branch);
-        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
-            this.installFailure(data);
-        } else {
+        if (validateResponse(data)) {
             this.installSuccesful(data);
+        } else {
+            this.installFailure(data);
         }
     }
 

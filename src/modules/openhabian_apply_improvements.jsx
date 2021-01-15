@@ -2,7 +2,8 @@ import React from "react";
 import RadioBox from "../components/radio-box.jsx";
 import Modal from "../components/modal.jsx";
 import ProgressDialog from "../components/progress-dialog.jsx";
-import { sendCommand } from "../functions/cockpit.js";
+import { validateResponse } from "../functions/helpers.js";
+import { applyImprovments } from "../functions/openhabian.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
@@ -18,11 +19,11 @@ export default class OpenHABianApplyImprovements extends React.Component {
                 showMenu: false,
                 disableModalClose: true,
             });
-        var data = await sendCommand(["./openhabian-apply-improvments.sh", this.state.selectedPackage], "/opt/openhab-cockpit/src/scripts");
-        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
-            this.installFailure(data);
-        } else {
+        var data = await applyImprovments(this.state.selectedPackage);
+        if (validateResponse(data)) {
             this.installSuccesful(data);
+        } else {
+            this.installFailure(data);
         }
     }
 

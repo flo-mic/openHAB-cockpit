@@ -1,10 +1,10 @@
 import React from "react";
 import Modal from "../components/modal.jsx";
 import ActionGroup from "../components/action-group.jsx";
-import { getInstalledopenHAB, getopenHABBackups, getopenHABBackupDir } from "../functions/openhab.js";
-import { sendCommand } from "../functions/cockpit.js";
+import { getInstalledopenHAB, getopenHABBackups, backupopenHAB, restoreopenHABBackup, deleteopenHABBackup } from "../functions/openhab.js";
 import ProgressDialog from "../components/progress-dialog.jsx";
 import { DropdownItem } from '@patternfly/react-core';
+import { validateResponse } from "../functions/helpers.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
@@ -32,7 +32,7 @@ export default class OHBackupRestore extends React.Component {
         var result = [];
         backups.forEach((backup) => {
             result.push(
-                <tr>
+                <tr key={backup.name}>
                     <td>{backup.date.toLocaleString()}</td>
                     <td>{backup.size}</td>
                     <td>{this.getActionItemGroup(backup.name)}</td>
@@ -75,28 +75,28 @@ position="right" dropdownItems={[
 
     async createBackup() {
         this.setState({ type: "backup", showMenu: false, disableModalClose: true });
-        var data = await sendCommand(["./openhab-backup-restore.sh", "backup"], "/opt/openhab-cockpit/src/scripts");
-        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
-            this.configFailure(data);
-        } else {
+        var data = await backupopenHAB();
+        if (validateResponse(data)) {
             this.configSuccesful(data);
+        } else {
+            this.configFailure(data);
         }
         this.buildTable();
     }
 
     async restoreBackup(name) {
         this.setState({ type: "restore", showMenu: false, disableModalClose: true });
-        var data = await sendCommand(["./openhab-backup-restore.sh", "restore", (await getopenHABBackupDir()) + "/" + name], "/opt/openhab-cockpit/src/scripts");
-        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
-            this.configFailure(data);
-        } else {
+        var data = await restoreopenHABBackup(name);
+        if (validateResponse(data)) {
             this.configSuccesful(data);
+        } else {
+            this.configFailure(data);
         }
     }
 
     async deleteBackup(name) {
         console.log("deleting openHAB backup '" + name + "'.");
-        await sendCommand(["rm", "-f", name], await getopenHABBackupDir());
+        await deleteopenHABBackup(name);
         this.buildTable();
     }
 

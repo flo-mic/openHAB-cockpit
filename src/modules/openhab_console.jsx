@@ -4,6 +4,7 @@ import { TextInput } from "@patternfly/react-core";
 import { getInstalledopenHAB, getopenHABConsoleIP, getopenHABConsolePort, setopenHABRemoteConsole } from "../functions/openhab.js";
 import ProgressDialog from "../components/progress-dialog.jsx";
 import RadioBox from "../components/radio-box.jsx";
+import { validateResponse } from "../functions/helpers.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
@@ -41,10 +42,10 @@ export default class OHConsole extends React.Component {
         this.setState({ showMenu: false, disableModalClose: true });
         console.log("Setting openhab console ip '" + this.state.consoleIP + "' and port '" + this.state.consolePort + "'.");
         var data = await setopenHABRemoteConsole(this.state.consoleIP, this.state.consolePort);
-        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
-            this.configFailure(data);
-        } else {
+        if (validateResponse(data)) {
             this.configSuccesful(data);
+        } else {
+            this.configFailure(data);
         }
     }
 

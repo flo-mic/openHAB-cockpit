@@ -3,6 +3,7 @@ import Modal from "../components/modal.jsx";
 import ProgressDialog from "../components/progress-dialog.jsx";
 import { Alert } from "@patternfly/react-core";
 import { sendCommand, sendScript } from "../functions/cockpit.js";
+import { validateResponse } from "../functions/helpers.js";
 
 import "../custom.scss";
 import "../patternfly.scss";
@@ -38,10 +39,10 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
             `,
             [], "/opt");
 
-        if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
-            this.installFailure(data);
-        } else {
+        if (validateResponse(data)) {
             this.installSuccesful(data);
+        } else {
+            this.installFailure(data);
         }
     }
 

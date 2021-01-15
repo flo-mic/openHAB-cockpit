@@ -1,12 +1,17 @@
 import { readFile, sendCommand, replaceFile, sendScript } from "./cockpit.js";
+import { callFunction, updateopenHABianConfig, openhabianScriptPath } from "./openhabian.js";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 
+export const repoRelease = "deb https://dl.bintray.com/openhab/apt-repo2 stable main";
+export const repoTesting = "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg testing main";
+export const repoSnapshot = "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg unstable main";
+
 // check if oh2 or oh3 is installed
 export async function getInstalledopenHAB() {
     // run bash script to check where openhab is installed
-    var result = await sendCommand(["./openhab2-isInstalled.sh"], "/opt/openhab-cockpit/src/scripts");
+    var result = await sendCommand(["./openhab2-isInstalled.sh"], openhabianScriptPath);
     if (result !== undefined && result !== "") {
         if (result.includes("openHAB2")) {
             return "openHAB2";
@@ -145,56 +150,59 @@ export async function getopenHABRepo() {
 export async function getopenHABBranch() {
     try {
         var repo = await getopenHABRepo();
-        var release = "deb https://dl.bintray.com/openhab/apt-repo2 stable main";
-        var testing = "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg testing main";
-        var snapshot = "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg unstable main";
-        if (repo.includes(release) && !repo.includes("#" + release)) return "release";
-        if (repo.includes(testing) && !repo.includes("#" + testing)) return "testing";
-        if (repo.includes(snapshot) && !repo.includes("#" + snapshot)) return "snapshot";
+        if (repo.includes(repoRelease) && !repo.includes("#" + repoRelease)) return "release";
+        if (repo.includes(repoTesting) && !repo.includes("#" + repoTesting)) return "testing";
+        if (repo.includes(repoSnapshot) && !repo.includes("#" + repoSnapshot)) return "snapshot";
     } catch (exception) {
         console.error("Can not read the openHAB Branch from the repo string. Exception: \n" + exception);
     }
 }
 
+// get openhab console config file
+export async function getopenHABConsoleConfig() {
+    var openhab = await getopenHABServiceName();
+    return "/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg";
+}
+
 // get openhab console ip
 export async function getopenHABConsoleIP() {
-    var openhab = await getopenHABServiceName();
+    var file = await getopenHABConsoleConfig();
     try {
-        var result = await readFile("/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg");
+        var result = await readFile(file);
         if (result !== undefined && result !== "") {
             if (result.includes("sshHost =")) {
                 return result.split("sshHost =")[1].split("\n")[0].trim();
             }
         }
         console.error(
-            "Can not read openHAB console ip from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'."
+            "Can not read openHAB console ip from file '" + file + "'."
         );
     } catch (exception) {
-        console.error("There was an error while reading the console ip from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'. Exception: \n" + exception);
+        console.error("There was an error while reading the console ip from file '" + file + "'. Exception: \n" + exception);
     }
 }
 
 // get openhab console ip
 export async function getopenHABConsolePort() {
-    var openhab = await getopenHABServiceName();
+    var file = await getopenHABConsoleConfig();
     try {
-        var result = await readFile("/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg");
+        var result = await readFile(await getopenHABConsoleConfig());
         if (result !== undefined && result !== "") {
             if (result.includes("sshPort =")) {
                 return result.split("sshPort =")[1].split("\n")[0].trim();
             }
         }
         console.error(
-            "Can not read openHAB console port from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'."
+            "Can not read openHAB console port from file '" + file + "'."
         );
     } catch (exception) {
-        console.error("There was an error while reading the console port from file '/var/lib/" + openhab + "/etc/org.apache.karaf.shell.cfg'. Exception: \n" + exception);
+        console.error("There was an error while reading the console port from file '" + file + "'. Exception: \n" + exception);
     }
 }
 
 // configures the openHAB remote console ip and port
 export async function setopenHABRemoteConsole(ip, port) {
-    var path = "/var/lib/" + await getopenHABServiceName() + "/etc/org.apache.karaf.shell.cfg";
+    var path = await getopenHABConsoleConfig();
     var data = await readFile(path);
     var currentIP = await getopenHABConsoleIP();
     data = data.replace("sshHost = " + currentIP, "sshHost = " + ip);
@@ -206,7 +214,8 @@ export async function setopenHABRemoteConsole(ip, port) {
 
 // installs the selected openhab
 export async function installopenHAB(openhab, branch) {
-    var result = await sendCommand(["./openhab-setup.sh", openhab, branch], "/opt/openhab-cockpit/src/scripts");
+    await updateopenHABianConfig();
+    var result = await callFunction(["openhab_setup", openhab, branch]);
     if (result === undefined || result === "") {
         result = "There was an error while installing openhab version '" + openhab + "' with branch '" + branch + "'.";
     }
@@ -231,6 +240,31 @@ export async function getopenHABBackups() {
     } catch (exception) {
         console.error("There was an error while reading available openHAB backups in '" + directory + "'. Exception: \n" + exception);
     }
+}
+
+// creates a backup of openHAB config
+export async function backupopenHAB() {
+    var result = await callFunction(["backup_openhab_config"]);
+    if (result === undefined || result === "") {
+        result = "There was an error while creating a backup of openhab. Response is undefined";
+    }
+    return result;
+}
+
+// restores a backup of openHAB config
+export async function restoreopenHABBackup(file) {
+    var backupfile = await getopenHABBackupDir() + "/" + file;
+    var result = await callFunction(["restore_openhab_config", backupfile]);
+    if (result === undefined || result === "") {
+        result = "There was an error while restoring the backup file '" + backupfile + "'. Response is undefined.";
+    }
+    return result;
+}
+
+// deletes a backup of openHAB config
+export async function deleteopenHABBackup(file) {
+    var backupfile = await getopenHABBackupDir() + "/" + file;
+    return await sendCommand(["rm", "-f", backupfile]);
 }
 
 function getDateFromBackupName(name) {
