@@ -20,11 +20,11 @@ import "regenerator-runtime/runtime";
 export default class OHStatus extends React.Component {
     // read all openhab details
     async get_details() {
+        getInstalledopenHAB().then((data) => { this.setState({ openhab: data }) });
+        getServiceStatus().then((data) => { this.setState({ serviceStatus: data }) });
+        getopenHABVersion().then((data) => { this.setState({ version: data }) });
+        getopenHABBranch().then((data) => { this.setState({ openhabBranch: data }) });
         this.setState({
-            openhab: await getInstalledopenHAB(),
-            serviceStatus: await getServiceStatus(),
-            version: await getopenHABVersion(),
-            openhabBranch: await getopenHABBranch(),
             consoleStatus:
         (await getopenHABConsoleIP()) == "127.0.0.1" ? "local" : "remote",
         });

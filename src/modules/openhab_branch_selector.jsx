@@ -11,13 +11,9 @@ import "regenerator-runtime/runtime";
 
 export default class OHBranchSelector extends React.Component {
     // load details for this component
-    async getDetails() {
-        var branch = await getopenHABBranch();
-        await this.setState({
-            openhab: await getInstalledopenHAB(),
-            branch: branch,
-        });
-        this.setCurrentBranch(branch);
+    getDetails() {
+        getInstalledopenHAB().then((data) => { this.setState({ openhab: data }) });
+        getopenHABBranch().then((data) => { this.setState({ branch: data }); this.setCurrentBranch(data) });
     }
 
     // Reset displayed items

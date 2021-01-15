@@ -12,10 +12,8 @@ import "core-js/stable";
 import "regenerator-runtime/runtime";
 
 export default class OHBackupRestore extends React.Component {
-    async getDetails() {
-        this.setState({
-            openhab: await getInstalledopenHAB(),
-        });
+    getDetails() {
+        getInstalledopenHAB().then((data) => { this.setState({ openhab: data }) });
         this.buildTable();
     }
 
