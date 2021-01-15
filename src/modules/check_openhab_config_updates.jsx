@@ -1,6 +1,6 @@
 import React from "react";
 import Modal from "../components/modal.jsx";
-import InstallationDialog from "../components/installation-dialog.jsx";
+import ProgressDialog from "../components/progress-dialog.jsx";
 import { Alert } from "@patternfly/react-core";
 import { sendCommand, sendScript } from "../functions/cockpit.js";
 
@@ -151,12 +151,13 @@ export default class CheckOpenHABCockpitUpdates extends React.Component {
                         </div>
                     </div>
                     <div className={showInstallDialog}>
-                        <InstallationDialog
+                        <ProgressDialog
             onClose={this.handleModalShow}
             packageName="openHAB-cockpit"
             showResult={this.state.showResult}
             message={this.state.consoleMessage}
             success={this.state.successful}
+            type="update"
                         />
                     </div>
                 </Modal>

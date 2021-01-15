@@ -3,7 +3,7 @@ import Modal from "../components/modal.jsx";
 import ActionGroup from "../components/action-group.jsx";
 import { getInstalledopenHAB, getopenHABBackups, getopenHABBackupDir } from "../functions/openhab.js";
 import { sendCommand } from "../functions/cockpit.js";
-import ConfigurationDialog from "../components/configuration-dialog.jsx";
+import ProgressDialog from "../components/progress-dialog.jsx";
 import { DropdownItem } from '@patternfly/react-core';
 
 import "../custom.scss";
@@ -73,8 +73,8 @@ position="right" dropdownItems={[
         );
     }
 
-    async createBackup(name) {
-        this.setState({ showMenu: false, disableModalClose: true });
+    async createBackup() {
+        this.setState({ type: "backup", showMenu: false, disableModalClose: true });
         var data = await sendCommand(["./openhab-backup-restore.sh", "backup"], "/opt/openhab-cockpit/src/scripts");
         if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
             this.configFailure(data);
@@ -85,7 +85,7 @@ position="right" dropdownItems={[
     }
 
     async restoreBackup(name) {
-        this.setState({ showMenu: false, disableModalClose: true });
+        this.setState({ type: "restore", showMenu: false, disableModalClose: true });
         var data = await sendCommand(["./openhab-backup-restore.sh", "restore", (await getopenHABBackupDir()) + "/" + name], "/opt/openhab-cockpit/src/scripts");
         if (data.toLowerCase().includes("error") || data.toLowerCase().includes("failed")) {
             this.configFailure(data);
@@ -136,6 +136,7 @@ position="right" dropdownItems={[
             consoleMessage: "Update done. Please reload the page to see them.",
             disableModalClose: false,
             isOpen: false,
+            type: "backup",
         };
         // handler for closing the modal
         this.handleClose = (e) => {
@@ -200,12 +201,13 @@ position="right" dropdownItems={[
                     </div>
                 </div>
                 <div className={showLoading}>
-                    <ConfigurationDialog
+                    <ProgressDialog
             onClose={this.handleClose}
             packageName="remote console"
             showResult={this.state.showResult}
             message={this.state.consoleMessage}
             success={this.state.successful}
+            type={this.state.type}
                     />
                 </div>
             </Modal>

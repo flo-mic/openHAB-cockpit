@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "../components/modal.jsx";
 import { Alert, TextInput } from "@patternfly/react-core";
 import { sendCommand } from "../functions/cockpit.js";
-import ConfigurationDialog from "../components/configuration-dialog.jsx";
+import ProgressDialog from "../components/progress-dialog.jsx";
 
 import "../custom.scss";
 import "../patternfly.scss";
@@ -234,12 +234,13 @@ export default class CheckDefaultUser extends React.Component {
                         </div>
                     </div>
                     <div className={showLoading}>
-                        <ConfigurationDialog
+                        <ProgressDialog
             onClose={this.handleModalShow}
             packageName="user password"
             showResult={this.state.showResult}
             message={this.state.consoleMessage}
             success={this.state.successful}
+            type="configure"
                         />
                     </div>
                 </Modal>

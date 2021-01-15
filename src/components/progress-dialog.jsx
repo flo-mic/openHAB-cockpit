@@ -1,9 +1,10 @@
-/* Returns a installation dialog
+/* Returns a progress dialog
  - onClose() -> will be called on close
  - packageName -> package to install
  - showResult -> boolean to show final page, default is false
  - message -> Can contain a console output in case of errors
  - success -> indicate if success or error during installation, default is true
+ - type -> "install", "update", "uninstall", "configure", "restore", backup"
  */
 
 import React from "react";
@@ -16,7 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "../custom.scss";
 import "../patternfly.scss";
 
-export default class InstallationDialog extends React.Component {
+export default class ProgressDialog extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -64,11 +65,19 @@ export default class InstallationDialog extends React.Component {
             ? "display-block display-flex-center"
             : "display-none";
 
+        const progressTypes = [
+            { type: "install", context: "installing", progress: "installation", result: "Installation" },
+            { type: "update", context: "updating", progress: "update", result: "Update" },
+            { type: "uninstall", context: "removing", progress: "removal", result: "Removal" },
+            { type: "configure", context: "configuring", progress: "configuration", result: "Configuration" },
+            { type: "restore", context: "restoring", progress: "restore", result: "Restore" },
+            { type: "backup", context: "backup", progress: "backup", result: "Backup" }
+        ];
         return (
             <div>
                 <div className={showInstallingSpinner}>
                     <div className="div-full-center">
-                        <h4>installing {this.props.packageName} ...</h4>
+                        <h4>{progressTypes.map((a) => { if (a.type === this.props.type) { return a.context } })} {this.props.packageName} ...</h4>
                     </div>
                     <div className="div-full-center" style={{ paddingTop: "1rem", minHeight: "86px" }}>
                         <span
@@ -82,7 +91,7 @@ export default class InstallationDialog extends React.Component {
                         </span>
                     </div>
                     <div className="div-full-center">
-                        <p>This installation will need some time, please wait.</p>
+                        <p>The {progressTypes.map((a) => { if (a.type === this.props.type) { return a.progress } })} will need some time please wait.</p>
                     </div>
                 </div>
                 <div className={showResult}>
@@ -94,7 +103,7 @@ export default class InstallationDialog extends React.Component {
                         />
                     </div>
                     <div style={{ paddingTop: "0.5rem" }} className="div-full-center">
-                        <p>Installation of package {this.props.packageName} {this.getFailureStatus()}.</p>
+                        <p>{progressTypes.map((a) => { if (a.type === this.props.type) { return a.result } })} of package {this.props.packageName} {this.getFailureStatus()}.</p>
                     </div>
                     <div className={showInstallMessages}>
                         <div className="div-full-center">

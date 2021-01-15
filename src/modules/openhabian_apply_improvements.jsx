@@ -1,7 +1,7 @@
 import React from "react";
 import RadioBox from "../components/radio-box.jsx";
 import Modal from "../components/modal.jsx";
-import InstallationDialog from "../components/installation-dialog.jsx";
+import ProgressDialog from "../components/progress-dialog.jsx";
 import { sendCommand } from "../functions/cockpit.js";
 
 import "../custom.scss";
@@ -222,12 +222,13 @@ export default class OpenHABianApplyImprovements extends React.Component {
                     </div>
                 </div>
                 <div className={showInstallDialog}>
-                    <InstallationDialog
+                    <ProgressDialog
             onClose={this.handleClose}
             packageName={this.state.selectedPackageName}
             showResult={this.state.showResult}
             message={this.state.consoleMessage}
             success={this.state.successful}
+            type="install"
                     />
                 </div>
             </Modal>

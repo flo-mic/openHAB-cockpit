@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "../components/modal.jsx";
 import { TextInput } from "@patternfly/react-core";
 import { getInstalledopenHAB, getopenHABConsoleIP, getopenHABConsolePort, setopenHABRemoteConsole } from "../functions/openhab.js";
-import ConfigurationDialog from "../components/configuration-dialog.jsx";
+import ProgressDialog from "../components/progress-dialog.jsx";
 import RadioBox from "../components/radio-box.jsx";
 
 import "../custom.scss";
@@ -12,10 +12,10 @@ import "regenerator-runtime/runtime";
 
 export default class OHConsole extends React.Component {
     async getDetails() {
+        getInstalledopenHAB().then((data) => { this.setState({ openhab: data }) });
         var consoleip = await getopenHABConsoleIP();
         var consolePort = await getopenHABConsolePort();
         this.setState({
-            openhab: await getInstalledopenHAB(),
             consoleIP: consoleip,
             consolePort: consolePort,
             selection: (consoleip === "127.0.0.1" && consolePort == "8101") ? "local" : (consoleip === "0.0.0.0" && consolePort == "8101") ? "remote" : "custom"
@@ -224,12 +224,13 @@ export default class OHConsole extends React.Component {
                     </div>
                 </div>
                 <div className={showLoading}>
-                    <ConfigurationDialog
+                    <ProgressDialog
             onClose={this.handleClose}
             packageName="remote console"
             showResult={this.state.showResult}
             message={this.state.consoleMessage}
             success={this.state.successful}
+            type="configure"
                     />
                 </div>
             </Modal>
