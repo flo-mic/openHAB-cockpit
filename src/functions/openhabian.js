@@ -26,8 +26,8 @@ export async function applyImprovments(selectedPackage) {
     return await sendCommand(["./openhabian-apply-improvments.sh", selectedPackage], openhabianScriptPath);
 }
 
-// checks for the default system password
-export async function checkDefaultSystemPassword() {
+// checks for the default system password returns true if password changed
+export async function defaultSystemPasswordChanged() {
     var data = await callFunction(["system_check_default_password"], openhabianScriptPath);
     if (validateResponse(data)) {
         return true;
@@ -38,5 +38,6 @@ export async function checkDefaultSystemPassword() {
 
 // checks for the default system password
 export async function setDefaultSystemPassword(password) {
-    return await sendCommand(["./change-default-password.sh", password], openhabianScriptPath);
+    var data = await sendCommand(["./change-default-password.sh", password], openhabianScriptPath);
+    return data.replace(password, "YOURPASSWORD");
 }

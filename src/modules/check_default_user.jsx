@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "../components/modal.jsx";
 import { Alert, TextInput } from "@patternfly/react-core";
 import { validateResponse } from "../functions/helpers.js";
-import { checkDefaultSystemPassword, setDefaultSystemPassword } from "../functions/openhabian.js";
+import { defaultSystemPasswordChanged, setDefaultSystemPassword } from "../functions/openhabian.js";
 import ProgressDialog from "../components/progress-dialog.jsx";
 
 import "../custom.scss";
@@ -13,7 +13,7 @@ import "regenerator-runtime/runtime";
 export default class CheckDefaultUser extends React.Component {
     // check if the system runs with default openhabian/pi password
     async checkForDefaultPassword() {
-        var data = await checkDefaultSystemPassword();
+        var data = await defaultSystemPasswordChanged();
         if (data === false) {
             this.setState({
                 defaultPasswordChanged: false,
