@@ -11,13 +11,15 @@ const openhabianStub = "openhabian-stub.sh";
 export async function callFunction(functionArray) {
     // add openhabian stub to array
     functionArray.unshift("./" + openhabianStub);
+    // update config to get always the latest settings
+    await updateopenHABianConfig();
     // run command
     return await sendCommand(functionArray, openhabianScriptPath);
 }
 
 // update openhabian config openhabian
 export async function updateopenHABianConfig() {
-    return await callFunction(["update_openhabian_conf"]);
+    return await sendCommand(["./" + openhabianStub, "update_openhabian_conf"], openhabianScriptPath);
 }
 
 // applys inprovments

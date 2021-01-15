@@ -1,5 +1,5 @@
 import { readFile, sendCommand, replaceFile, sendScript } from "./cockpit.js";
-import { callFunction, updateopenHABianConfig, openhabianScriptPath } from "./openhabian.js";
+import { callFunction, openhabianScriptPath } from "./openhabian.js";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
@@ -214,7 +214,6 @@ export async function setopenHABRemoteConsole(ip, port) {
 
 // installs the selected openhab
 export async function installopenHAB(openhab, branch) {
-    await updateopenHABianConfig();
     var result = await callFunction(["openhab_setup", openhab, branch]);
     if (result === undefined || result === "") {
         result = "There was an error while installing openhab version '" + openhab + "' with branch '" + branch + "'.";
