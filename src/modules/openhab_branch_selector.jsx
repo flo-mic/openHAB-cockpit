@@ -4,6 +4,7 @@ import Modal from "../components/modal.jsx";
 import ProgressDialog from "../components/progress-dialog.jsx";
 import { getInstalledopenHAB, getopenHABBranch, installopenHAB } from "../functions/openhab.js";
 import { validateResponse } from "../functions/helpers.js";
+import NotificationDialog from "../components/notification-dialog.jsx";
 
 import "../custom.scss";
 import "../patternfly.scss";
@@ -43,19 +44,49 @@ export default class OHBranchSelector extends React.Component {
             return;
         }
         if (this.state.branchRelease === true) {
-            this.installScript("stable", "release");
+            this.showConfirmationMessage("stable", "release");
         }
         if (this.state.branchTesting === true) {
-            this.installScript("testing", "testing");
+            this.showConfirmationMessage("testing", "testing");
         }
         if (this.state.branchSnapshot === true) {
-            this.installScript("unstable", "snapshot");
+            this.showConfirmationMessage("unstable", "snapshot");
+        }
+    }
+
+    showConfirmationMessage(branch, displayName) {
+        this.setState({
+            disableModalClose: true,
+            notificationDialog: (
+                <NotificationDialog
+          onConfirm={this.handleConfirmation}
+          value={branch + "/" + displayName}
+          onCancel={this.handleCancel}
+          type="info"
+          message={this.getConfirmationMessage(branch)}
+                />
+            ),
+        });
+    }
+
+    // get confirmation meesage to show user
+    getConfirmationMessage(branch) {
+        if (branch === "stable") {
+            return "You are about to install or change to the latest stable openHAB3 release. \n\nPlease be aware that downgrading from a newer unstable snapshot build is not officially supported. Please consult with the documentation or community forum and be sure to take a full openHAB configuration backup first!";
+        }
+        if (branch === "testing") {
+            return "You are about to install or change to the latest milestone (testing) \n\nopenHAB3 build. It contains the latest features and is supposed to run stable, but if you experience bugs or incompatibilities, please help with enhancing openHAB by posting them on the community forum or by raising a GitHub issue.\n\nPlease be aware that downgrading from a newer build is not officially supported.";
+        }
+        if (branch === "unstable") {
+            return "Proceed with caution!\n\nYou are about to switch over to the latest openHAB3 unstable snapshot build. The daily snapshot builds contain the latest features and improvements but might also suffer from bugs or incompatibilities. Please be sure to take a full openHAB configuration backup first!";
         }
     }
 
     // Installs openhab
-    async installScript(branch, displayName) {
-        this.setState({ showMenu: false, disableModalClose: true, brancheToInstall: displayName });
+    async installScript(value) {
+        var branch = value.split("/")[0];
+        var displayName = value.split("/")[1];
+        this.setState({ showMenu: false, disableModalClose: true, brancheToInstall: displayName, notificationDialog: <div /> });
         console.log("Installation of '" + this.state.openhab + "' branch '" + displayName + "' started.");
         var data = await installopenHAB(this.state.openhab, branch);
         if (validateResponse(data)) {
@@ -101,6 +132,7 @@ export default class OHBranchSelector extends React.Component {
             successful: false,
             consoleMessage: "",
             disableModalClose: false,
+            notificationDialog: <div />
         };
 
         // handler for closing the modal
@@ -118,6 +150,20 @@ export default class OHBranchSelector extends React.Component {
                 this.setState({ branchTesting: true });
             if (e === "snapshot")
                 this.setState({ branchSnapshot: true });
+        };
+        this.handleConfirmation = (e) => {
+            this.installScript(e);
+        };
+        // will be called from the confirmation dialog
+        this.handleCancel = (e) => {
+            this.setState({ notificationDialog: <div /> });
+            setTimeout(
+                function() {
+                    this.setState({ disableModalClose: false });
+                }
+                        .bind(this),
+                100
+            );
         };
     }
 
@@ -142,6 +188,7 @@ export default class OHBranchSelector extends React.Component {
         show={this.state.show}
         header={this.state.openhab + " branches"}
             >
+                {this.state.notificationDialog}
                 <div className={showMenuDialog}>
                     <RadioBox
             onSelect={this.handleSelectionChange}
@@ -150,7 +197,7 @@ export default class OHBranchSelector extends React.Component {
             content={
                 <div>
                     <b>release</b> - Install or switch to the latest openHAB
-                    release. Use thisfor your productive environment.
+                    release. Recomended for productive usage.
                 </div>
             }
                     />

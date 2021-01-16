@@ -87,6 +87,21 @@
     padding: 0.5rem;
   }
 
+  .info-icon {
+    color: black;
+    padding: 0.5rem;
+  }
+
+  .warn-icon {
+    color: orange;
+    padding: 0.5rem;
+  }
+
+  .error-icon {
+    color: red;
+    padding: 0.5rem;
+  }
+
   .dropdown-button {
     padding-right: 0.5rem;
     border: none;
@@ -264,4 +279,37 @@
 .action-list {
   position: fixed;
   margin-top: -0.45rem;
+}
+
+.table-body {
+  display: block;
+  min-height: 185px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.table-head {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.table {
+  display: block;
+  max-height: 300px;
+  overflow-y: hidden;
+}
+
+.table-row {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.notification-message {
+  font-size: var(--pf-global--FontSize--lg);
+  font-size: var(--pf-global--FontSize--xl);
+  line-height: var(--pf-global--LineHeight--sm);
+  font-family: var(--pf-global--FontFamily--redhatfont--heading--sans-serif);
+  font-size: 100%;
+  font-weight: var(--pf-global--FontWeight--normal);
+  white-space: pre-wrap;
 }

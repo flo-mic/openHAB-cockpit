@@ -7,7 +7,7 @@ export default class Modal extends React.Component {
     constructor() {
         super();
         this.state = { prevStateShow: "", node: React.createRef() };
-        // Calls the close methode passed to the ecomponent
+        // Calls the close methode passed to the component
         this.onClose = (e) => {
             if (!this.props.disableModalClose)
                 this.props.onClose && this.props.onClose(e);

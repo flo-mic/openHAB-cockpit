@@ -226,7 +226,7 @@ export async function getopenHABBackups() {
     var directory = await getopenHABBackupDir();
     var backups = [];
     try {
-        var result = await sendScript("ls -lah | awk '{print $9, $5}' | tail -5", [], directory);
+        var result = await sendScript("ls -lah | awk '{print $9, $5}'", [], directory);
         if (result !== undefined && result !== "") {
             result.split("\n").forEach(element => {
                 if (element.trim() !== "" && !element.startsWith(". ") && !element.startsWith(".. ")) {
@@ -234,7 +234,9 @@ export async function getopenHABBackups() {
                     backups.push({ name: name, size: element.split(" ")[1], date: getDateFromBackupName(name) });
                 }
             });
-            return backups;
+            return backups.sort((a, b) =>
+                a.date < b.date ? 1 : -1
+            );
         }
     } catch (exception) {
         console.error("There was an error while reading available openHAB backups in '" + directory + "'. Exception: \n" + exception);
@@ -268,5 +270,6 @@ export async function deleteopenHABBackup(file) {
 
 function getDateFromBackupName(name) {
     var tmp = (name.split("-")[2] + "_" + name.split("-")[3].split(".")[0]).split("_");
-    return new Date("20" + tmp[0] + "-" + tmp[1] + "-" + tmp[2] + "T" + tmp[3] + ":" + tmp[4] + ":" + tmp[5] + "Z");
+    var date = new Date("20" + tmp[0] + "-" + tmp[1] + "-" + tmp[2] + "T" + tmp[3] + ":" + tmp[4] + ":" + tmp[5] + "Z");
+    return new Date(date.getTime() + (date.getTimezoneOffset() * 60 * 1000));
 }
