@@ -17,18 +17,30 @@ export default class ActionGroup extends React.Component {
         this.state = {
             isOpen: false,
         };
-        this.handleToggle = (isOpen, event) => {
-            event.stopPropagation();
-            this.setState({
-                isOpen
-            });
-        };
-        this.handleSelect = event => {
-            event.stopPropagation();
+        this.handleToggle = (event) => {
+            this.set_event_Handler();
             this.setState({
                 isOpen: !this.state.isOpen
             });
         };
+        this.handleSelect = event => {
+            this.set_event_Handler();
+            this.setState({
+                isOpen: !this.state.isOpen
+            });
+        };
+    }
+
+    set_event_Handler() {
+        if (this.state.isOpen) {
+            document.removeEventListener("click", this.handleSelect, false);
+        } else {
+            document.addEventListener("click", this.handleSelect, false);
+        }
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("click", this.handleSelect, false);
     }
 
     render() {

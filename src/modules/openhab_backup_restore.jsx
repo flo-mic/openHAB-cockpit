@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from "../components/modal.jsx";
 import ActionGroup from "../components/action-group.jsx";
+import { downloadFile } from "../functions/cockpit.js";
 import {
     getInstalledopenHAB,
     getopenHABBackups,
@@ -218,6 +219,11 @@ export default class OHBackupRestore extends React.Component {
         );
     }
 
+    // Doownload an existing backup
+    async downloadBackup(name) {
+        downloadFile(await getopenHABBackupDir() + "/" + name, name, "application/zip");
+    }
+
     constructor(props) {
         super(props);
         this.state = {
@@ -239,8 +245,7 @@ export default class OHBackupRestore extends React.Component {
         };
         // will be called by action button
         this.handleDownload = (e) => {
-            console.log("juhu");
-            console.log(e);
+            this.downloadBackup(e);
         };
         // will be called by action button
         this.handleDelete = (e) => {

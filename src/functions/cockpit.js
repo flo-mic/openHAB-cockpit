@@ -47,6 +47,36 @@ export async function replaceFile(filePath, newContent) {
             });
 }
 
+// get a bynary file on server async to get immediate result
+export async function getBinaryFile(filePath) {
+    return await cockpit
+            .file(filePath, {
+                superuser: "require",
+                err: "out",
+                binary: true,
+            })
+            .read()
+            .then((data) => {
+                return data;
+            })
+            .catch((exception, data) => {
+                console.error(
+                    "Could not get the binary file '" + filePath + "'. Exception: \n" + exception
+                );
+            });
+}
+
+// download a file to the client
+// get a bynary file on server async to get immediate result
+export async function downloadFile(filePath, fileName, mimeType) {
+    var byte = await (getBinaryFile(filePath));
+    var blob = new Blob([byte], { type: mimeType });
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+}
+
 // run command on server with result
 export async function sendCommand(commandArray, directory) {
     // set default directory if not provided to function
